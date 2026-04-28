@@ -1,4 +1,5 @@
-
+using HousingRentalApp.Api.Data;
+using Microsoft.EntityFrameworkCore;
 namespace HousingRentalApp.Api
 {
     public class Program
@@ -6,6 +7,9 @@ namespace HousingRentalApp.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddControllers();
            
