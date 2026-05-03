@@ -45,8 +45,7 @@ namespace HousingRentalApp.Api.Controllers
                 {
                     email = result.Email,
                     firstName = result.FirstName,
-                    lastName = result.LastName,
-                    roles = result.Roles
+                    lastName = result.LastName
                 }
             });
         }
@@ -81,7 +80,6 @@ namespace HousingRentalApp.Api.Controllers
                     email = result.Email,
                     firstName = result.FirstName,
                     lastName = result.LastName,
-                    roles = result.Roles
                 }
             });
         }
@@ -95,13 +93,11 @@ namespace HousingRentalApp.Api.Controllers
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            var roles = User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(r => r.Value).ToList();
 
             return Ok(new
             {
                 userId = userId,
                 email = email,
-                roles = roles,
                 message = "Мой профиль"
             });
         }

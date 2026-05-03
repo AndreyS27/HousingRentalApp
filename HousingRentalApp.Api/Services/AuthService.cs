@@ -41,11 +41,6 @@ namespace HousingRentalApp.Api.Services
                 LastName = request.LastName,
             };
 
-            user.UserRoles = new List<UserRole>
-            {
-                new UserRole { RoleId = 1 }
-            };
-
             await _userRepository.CreateAsync(user);
 
             var token = GenerateJwtToken(user);
@@ -57,8 +52,7 @@ namespace HousingRentalApp.Api.Services
                 Token = token,
                 Email = user.Email,
                 FirstName = user.FirstName,
-                LastName = user.LastName,
-                Roles = new List<string> { "Арендатор" }
+                LastName = user.LastName
             };
         }
 
@@ -86,10 +80,6 @@ namespace HousingRentalApp.Api.Services
 
             var token = GenerateJwtToken(user);
 
-            // Получаем список ролей пользователя
-            var roles = user.UserRoles?.Select(ur => ur.Role?.RoleName ?? "Арендатор").ToList()
-                        ?? new List<string> { "Арендатор" };
-
             return new AuthResponse
             {
                 Success = true,
@@ -98,7 +88,6 @@ namespace HousingRentalApp.Api.Services
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Roles = roles
             };
         }
 
@@ -131,19 +120,6 @@ namespace HousingRentalApp.Api.Services
                 new Claim(ClaimTypes.GivenName, user.FirstName),
                 new Claim(ClaimTypes.Surname, user.LastName)
             };
-
-            if (user.UserRoles != null)
-            {
-                foreach (var userRole in user.UserRoles)
-                {
-                    var roleName = userRole.Role?.RoleName ?? "Арендатор";
-                    claims.Add(new Claim(ClaimTypes.Role, roleName));
-                }
-            }
-            else
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "Арендатор"));
-            }
 
             var token = new JwtSecurityToken(
                 issuer: issuer,
