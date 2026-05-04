@@ -11,7 +11,7 @@ public partial class PropertyPhoto
 
     public string PhotoUrl { get; set; } = null!;
 
-    public bool? IsMain { get; set; }
+    public bool IsMain { get; set; }
 
     public DateTime? UploadedAt { get; set; }
 

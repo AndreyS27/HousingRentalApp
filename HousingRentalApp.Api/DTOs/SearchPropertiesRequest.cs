@@ -3,8 +3,8 @@
     public class SearchPropertiesRequest
     {
         public string? City { get; set; }
-        public DateTime? CheckInDate { get; set; }
-        public DateTime? CheckOutDate { get; set; }
+        public DateOnly? CheckInDate { get; set; }
+        public DateOnly? CheckOutDate { get; set; }
         public int? GuestsCount { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }

@@ -9,7 +9,7 @@
         public int? GuestsCount { get; set; }
         public int? BedroomsCount { get; set; }
         public int? BedsCount { get; set; }
-        public decimal? BathroomsCount { get; set; }
+        public int? BathroomsCount { get; set; }
         public decimal? PricePerNight { get; set; }
         public int? PropertyTypeId { get; set; }
         public bool? IsActive { get; set; }
