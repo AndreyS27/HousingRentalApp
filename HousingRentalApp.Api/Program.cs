@@ -18,7 +18,9 @@ namespace HousingRentalApp.Api
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
 
             // Настройка JWT аутентификации
             var jwtSecret = builder.Configuration["JwtSettings:Secret"];
