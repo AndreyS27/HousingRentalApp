@@ -21,6 +21,10 @@ namespace HousingRentalApp.Api
             builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
+            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
+
 
             // Настройка JWT аутентификации
             var jwtSecret = builder.Configuration["JwtSettings:Secret"];

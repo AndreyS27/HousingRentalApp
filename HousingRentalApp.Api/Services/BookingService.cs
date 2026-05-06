@@ -67,9 +67,7 @@ namespace HousingRentalApp.Api.Services
                 CheckInDate = request.CheckInDate,
                 CheckOutDate = request.CheckOutDate,
                 GuestsCount = request.GuestsCount,
-                TotalPrice = totalPrice,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                TotalPrice = totalPrice
             };
 
             booking = await _bookingRepository.CreateAsync(booking);
@@ -79,8 +77,6 @@ namespace HousingRentalApp.Api.Services
                 BookingId = booking.BookingId,
                 PaymentStatusId = 1, // платёж ожидает оплаты
                 Amount = totalPrice,
-                PaymentDate = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
             };
 
             await _paymentRepository.CreateAsync(payment);
