@@ -21,7 +21,7 @@ public partial class Booking
 
     public decimal TotalPrice { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
