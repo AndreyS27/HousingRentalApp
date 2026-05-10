@@ -7,6 +7,7 @@ import { Notifications } from '@mantine/notifications';
 import { store } from './store';
 import App from './App';
 import './index.css';
+import 'leaflet/dist/leaflet.css';
 
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
