@@ -12,6 +12,8 @@ import {
   Title,
   Alert,
   Text,
+  Box,
+  ScrollArea,
 } from '@mantine/core';
 import { IconSearch, IconFilter, IconCalendar, IconUsers } from '@tabler/icons-react';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
@@ -87,8 +89,9 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <Stack gap={0}>
-      <Paper shadow="xs" p="md" radius={0}>
+    <Stack gap={0} style={{ height: '100vh' }}>
+      {/* Шапка */}
+      <Paper shadow="xs" p="md" radius={0} style={{ flexShrink: 0 }}>
         <Container size="xl">
           <Stack gap="md">
             <Group justify="space-between">
@@ -151,49 +154,53 @@ export const HomePage: React.FC = () => {
           </Stack>
         </Container>
       </Paper>
-      {/* Левый контейнер основного блока (карточки объектов) */}
-      {/* <Container size="xl" py="md"> */}
-      <Grid>
-        <Grid.Col span={6}>
-          {loading ? (
-            <Center style={{ height: 400 }}>
-              <Loader size="xl" />
-            </Center>
-          ) : properties.length === 0 ? (
-            <Center style={{ height: 400 }}>
-              <Alert color="yellow" title="Ничего не найдено">
-                Попробуйте изменить параметры поиска или город
-              </Alert>
-            </Center>
-          ) : (
-            <>
-              <Text mb="md">Найдено: {totalCount} объектов</Text>
-              {/* Внутренний Grid для карточек по 2 в ряд */}
-              <Grid gutter="md">
-                {properties.map((property) => (
-                  <Grid.Col span={6} key={property.propertyId}>
-                    <PropertyCard
-                      property={property}
-                      onClick={() => handlePropertySelect(property.propertyId)}
-                    />
-                  </Grid.Col>
-                ))}
-              </Grid>
-            </>
-          )}
-        </Grid.Col>
-        {/* Правый контейнер основного блока (карта) */}
-        <Grid.Col span={6}>
-          <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}>
-            <PropertyMap
-              properties={properties}
-              cityCoordinates={cityCoordinates}
-              onPropertySelect={handlePropertySelect}
-            />
-          </Paper>
-        </Grid.Col>
-      </Grid>
-      {/* </Container> */}
+
+      {/* Основной контент */}
+      <div style={{ flex: 1, minHeight: 0, padding: '16px' }}>
+        <Grid style={{ height: '100%' }}>
+          {/* Левая колонка — карточки с использованием ScrollArea */}
+          <Grid.Col span={6} style={{ height: '100%' }}>
+            {loading ? (
+              <Center style={{ height: '100%' }}>
+                <Loader size="xl" />
+              </Center>
+            ) : properties.length === 0 ? (
+              <Center style={{ height: '100%' }}>
+                <Alert color="yellow" title="Ничего не найдено">
+                  Попробуйте изменить параметры поиска или город
+                </Alert>
+              </Center>
+            ) : (
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Text mb="md">Найдено: {totalCount} объектов</Text>
+                <ScrollArea offsetScrollbars h="100vh">
+                  <Grid gutter="md">
+                    {properties.map((property) => (
+                      <Grid.Col span={6} key={property.propertyId}>
+                        <PropertyCard
+                          property={property}
+                          onClick={() => handlePropertySelect(property.propertyId)}
+                        />
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                </ScrollArea>
+              </div>
+            )}
+          </Grid.Col>
+
+          {/* Правая колонка — карта */}
+          <Grid.Col span={6} style={{ height: '750px' }}>
+            {/* <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}> */}
+              <PropertyMap
+                properties={properties}
+                cityCoordinates={cityCoordinates}
+                onPropertySelect={handlePropertySelect}
+              />
+            {/* </Paper> */}
+          </Grid.Col>
+        </Grid>
+      </div>
 
       <FiltersModal
         opened={filtersOpened}

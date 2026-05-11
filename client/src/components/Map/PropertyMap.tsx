@@ -33,7 +33,7 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
   }
 
   return (
-    <Paper shadow="sm" p={0} radius="md" style={{ overflow: 'hidden', height: 500 }}>
+    <Paper shadow="sm" p={0} radius="md" style={{ overflow: 'hidden', height: '100%' }}>
       <MapContainer
         center={cityCoordinates}
         zoom={12}
