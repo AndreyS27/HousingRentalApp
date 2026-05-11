@@ -1,14 +1,12 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { HomePage } from './pages/HomePage/HomePage';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+    </Routes>
   );
 }
 

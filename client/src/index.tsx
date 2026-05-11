@@ -7,18 +7,21 @@ import { Notifications } from '@mantine/notifications';
 import { store } from './store';
 import App from './App';
 import './index.css';
-import 'leaflet/dist/leaflet.css';
 
+// Импорт стилей Mantine
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
+
+// Импорт стилей Leaflet
+import 'leaflet/dist/leaflet.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 root.render(
-  <React.StrictMode>
+  
     <Provider store={store}>
       <BrowserRouter>
         <MantineProvider>
@@ -27,5 +30,5 @@ root.render(
         </MantineProvider>
       </BrowserRouter>
     </Provider>
-  </React.StrictMode>
+  
 );

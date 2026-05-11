@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Image, Text, Badge, Group, Rating, Box } from '@mantine/core';
+import { Card, Image, Text, Badge, Group } from '@mantine/core';
 import { IconBed, IconUsers, IconMapPin } from '@tabler/icons-react';
 import { PropertySummary } from '../../types';
 
@@ -23,7 +23,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick })
           src={property.mainPhotoUrl || 'https://placehold.co/400x300?text=No+Image'}
           height={200}
           alt={property.title}
-          fallbackSrc="https://placehold.co/400x300?text=Loading"
         />
       </Card.Section>
 

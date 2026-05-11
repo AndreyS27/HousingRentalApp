@@ -22,11 +22,11 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
   onApply,
   onReset,
 }) => {
-    const handleApply = () => {
+  const handleApply = () => {
     onApply();
     onClose();
   };
-
+  
   return (
     <Modal opened={opened} onClose={onClose} title="Фильтры" size="md">
       <Stack gap="md">

@@ -11,9 +11,10 @@ import {
   Center,
   Title,
   Alert,
+  Text,
 } from '@mantine/core';
 import { IconSearch, IconFilter, IconCalendar, IconUsers } from '@tabler/icons-react';
-import { DatePicker } from '@mantine/dates';
+import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
 import { PropertyCard } from '../../components/PropertyCard/PropertyCard';
 import { PropertyMap } from '../../components/Map/PropertyMap';
 import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
@@ -23,34 +24,28 @@ import { PropertySummary, SearchParams } from '../../types';
 import dayjs from 'dayjs';
 
 export const HomePage: React.FC = () => {
-  // Состояния для формы поиска
   const [city, setCity] = useState('Москва');
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  const [dateRange, setDateRange] = useState<DatesRangeValue>([null, null]);
   const [guestsCount, setGuestsCount] = useState<number | null>(null);
   
-  // Состояния для фильтров
   const [filtersOpened, setFiltersOpened] = useState(false);
   const [bedroomsCount, setBedroomsCount] = useState<number | null>(null);
   const [bedsCount, setBedsCount] = useState<number | null>(null);
   
-  // Состояния для данных
   const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
   
-  // Функция поиска
   const performSearch = useCallback(async () => {
     if (!city.trim()) return;
     
     setLoading(true);
     
     try {
-      // 1. Получаем координаты города для карты
       const coords = await geocodeCity(city);
       setCityCoordinates(coords);
       
-      // 2. Формируем параметры запроса
       const params: SearchParams = {
         city: city,
         checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
@@ -62,10 +57,9 @@ export const HomePage: React.FC = () => {
         pageSize: 10,
       };
       
-      // 3. Запрашиваем объекты
       const response = await propertiesApi.search(params);
-      setProperties(response.data.properties);
-      setTotalCount(response.data.totalCount);
+      setProperties(response.data.properties || []);
+      setTotalCount(response.data.totalCount || 0);
       
     } catch (error) {
       console.error('Ошибка поиска:', error);
@@ -74,23 +68,18 @@ export const HomePage: React.FC = () => {
     }
   }, [city, dateRange, guestsCount, bedroomsCount, bedsCount]);
   
-  // Первоначальная загрузка при монтировании компонента
   useEffect(() => {
     performSearch();
   }, []);
   
-  // Обработчик клика по карточке объекта
   const handlePropertySelect = (propertyId: number) => {
-    // TODO: переход на страницу деталей объекта
     console.log('Выбран объект:', propertyId);
   };
   
-  // Применение фильтров
   const handleApplyFilters = () => {
     performSearch();
   };
   
-  // Сброс фильтров
   const handleResetFilters = () => {
     setBedroomsCount(null);
     setBedsCount(null);
@@ -99,11 +88,9 @@ export const HomePage: React.FC = () => {
   
   return (
     <Stack gap={0}>
-      {/* Шапка с поиском */}
       <Paper shadow="xs" p="md" radius={0}>
         <Container size="xl">
           <Stack gap="md">
-            {/* Верхняя строка шапки */}
             <Group justify="space-between">
               <Title order={3} style={{ color: '#339af0' }}>
                 HousingRental
@@ -111,8 +98,7 @@ export const HomePage: React.FC = () => {
               <Button variant="default">Войти / Зарегистрироваться</Button>
             </Group>
             
-            {/* Блок поиска */}
-            <Grid gutter="md" align="flex-end">
+            <Grid grow align="flex-end">
               <Grid.Col span={3}>
                 <TextInput
                   label="Город"
@@ -124,7 +110,7 @@ export const HomePage: React.FC = () => {
               </Grid.Col>
               
               <Grid.Col span={4}>
-                <DatePicker
+                <DatePickerInput
                   type="range"
                   label="Даты"
                   placeholder="Выберите даты"
@@ -166,10 +152,8 @@ export const HomePage: React.FC = () => {
         </Container>
       </Paper>
       
-      {/* Основной контент */}
       <Container size="xl" py="md">
-        <Grid gutter="md">
-          {/* Левая колонка: список объектов */}
+        <Grid>
           <Grid.Col span={6}>
             {loading ? (
               <Center style={{ height: 400 }}>
@@ -197,12 +181,10 @@ export const HomePage: React.FC = () => {
             )}
           </Grid.Col>
           
-          {/* Правая колонка: карта */}
           <Grid.Col span={6}>
             <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}>
               <PropertyMap
                 properties={properties}
-                selectedCity={city}
                 cityCoordinates={cityCoordinates}
                 onPropertySelect={handlePropertySelect}
               />
@@ -211,7 +193,6 @@ export const HomePage: React.FC = () => {
         </Grid>
       </Container>
       
-      {/* Модальное окно фильтров */}
       <FiltersModal
         opened={filtersOpened}
         onClose={() => setFiltersOpened(false)}
