@@ -27,25 +27,25 @@ export const HomePage: React.FC = () => {
   const [city, setCity] = useState('Москва');
   const [dateRange, setDateRange] = useState<DatesRangeValue>([null, null]);
   const [guestsCount, setGuestsCount] = useState<number | null>(null);
-  
+
   const [filtersOpened, setFiltersOpened] = useState(false);
   const [bedroomsCount, setBedroomsCount] = useState<number | null>(null);
   const [bedsCount, setBedsCount] = useState<number | null>(null);
-  
+
   const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
-  
+
   const performSearch = useCallback(async () => {
     if (!city.trim()) return;
-    
+
     setLoading(true);
-    
+
     try {
       const coords = await geocodeCity(city);
       setCityCoordinates(coords);
-      
+
       const params: SearchParams = {
         city: city,
         checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
@@ -56,36 +56,36 @@ export const HomePage: React.FC = () => {
         page: 1,
         pageSize: 10,
       };
-      
+
       const response = await propertiesApi.search(params);
       setProperties(response.data.properties || []);
       setTotalCount(response.data.totalCount || 0);
-      
+
     } catch (error) {
       console.error('Ошибка поиска:', error);
     } finally {
       setLoading(false);
     }
   }, [city, dateRange, guestsCount, bedroomsCount, bedsCount]);
-  
+
   useEffect(() => {
     performSearch();
   }, []);
-  
+
   const handlePropertySelect = (propertyId: number) => {
     console.log('Выбран объект:', propertyId);
   };
-  
+
   const handleApplyFilters = () => {
     performSearch();
   };
-  
+
   const handleResetFilters = () => {
     setBedroomsCount(null);
     setBedsCount(null);
     performSearch();
   };
-  
+
   return (
     <Stack gap={0}>
       <Paper shadow="xs" p="md" radius={0}>
@@ -97,7 +97,7 @@ export const HomePage: React.FC = () => {
               </Title>
               <Button variant="default">Войти / Зарегистрироваться</Button>
             </Group>
-            
+
             <Grid grow align="flex-end">
               <Grid.Col span={3}>
                 <TextInput
@@ -108,7 +108,7 @@ export const HomePage: React.FC = () => {
                   leftSection={<IconSearch size={16} />}
                 />
               </Grid.Col>
-              
+
               <Grid.Col span={4}>
                 <DatePickerInput
                   type="range"
@@ -119,7 +119,7 @@ export const HomePage: React.FC = () => {
                   leftSection={<IconCalendar size={16} />}
                 />
               </Grid.Col>
-              
+
               <Grid.Col span={3}>
                 <TextInput
                   label="Количество гостей"
@@ -130,13 +130,13 @@ export const HomePage: React.FC = () => {
                   leftSection={<IconUsers size={16} />}
                 />
               </Grid.Col>
-              
+
               <Grid.Col span={2}>
                 <Button fullWidth onClick={performSearch} loading={loading}>
                   Найти
                 </Button>
               </Grid.Col>
-              
+
               <Grid.Col span={1}>
                 <Button
                   variant="light"
@@ -151,48 +151,50 @@ export const HomePage: React.FC = () => {
           </Stack>
         </Container>
       </Paper>
-      
-      <Container size="xl" py="md">
-        <Grid>
-          <Grid.Col span={6}>
-            {loading ? (
-              <Center style={{ height: 400 }}>
-                <Loader size="xl" />
-              </Center>
-            ) : properties.length === 0 ? (
-              <Center style={{ height: 400 }}>
-                <Alert color="yellow" title="Ничего не найдено">
-                  Попробуйте изменить параметры поиска или город
-                </Alert>
-              </Center>
-            ) : (
-              <>
-                <Text mb="md">Найдено: {totalCount} объектов</Text>
-                <Stack gap="md">
-                  {properties.map((property) => (
+      {/* Левый контейнер основного блока (карточки объектов) */}
+      {/* <Container size="xl" py="md"> */}
+      <Grid>
+        <Grid.Col span={6}>
+          {loading ? (
+            <Center style={{ height: 400 }}>
+              <Loader size="xl" />
+            </Center>
+          ) : properties.length === 0 ? (
+            <Center style={{ height: 400 }}>
+              <Alert color="yellow" title="Ничего не найдено">
+                Попробуйте изменить параметры поиска или город
+              </Alert>
+            </Center>
+          ) : (
+            <>
+              <Text mb="md">Найдено: {totalCount} объектов</Text>
+              {/* Внутренний Grid для карточек по 2 в ряд */}
+              <Grid gutter="md">
+                {properties.map((property) => (
+                  <Grid.Col span={6} key={property.propertyId}>
                     <PropertyCard
-                      key={property.propertyId}
                       property={property}
                       onClick={() => handlePropertySelect(property.propertyId)}
                     />
-                  ))}
-                </Stack>
-              </>
-            )}
-          </Grid.Col>
-          
-          <Grid.Col span={6}>
-            <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}>
-              <PropertyMap
-                properties={properties}
-                cityCoordinates={cityCoordinates}
-                onPropertySelect={handlePropertySelect}
-              />
-            </Paper>
-          </Grid.Col>
-        </Grid>
-      </Container>
-      
+                  </Grid.Col>
+                ))}
+              </Grid>
+            </>
+          )}
+        </Grid.Col>
+        {/* Правый контейнер основного блока (карта) */}
+        <Grid.Col span={6}>
+          <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}>
+            <PropertyMap
+              properties={properties}
+              cityCoordinates={cityCoordinates}
+              onPropertySelect={handlePropertySelect}
+            />
+          </Paper>
+        </Grid.Col>
+      </Grid>
+      {/* </Container> */}
+
       <FiltersModal
         opened={filtersOpened}
         onClose={() => setFiltersOpened(false)}
