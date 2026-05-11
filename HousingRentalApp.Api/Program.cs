@@ -58,7 +58,7 @@ namespace HousingRentalApp.Api
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            //builder.Services.AddSwaggerGen();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -86,6 +86,18 @@ namespace HousingRentalApp.Api
                 });
             });
 
+            // CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -94,6 +106,7 @@ namespace HousingRentalApp.Api
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowReactApp");
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
