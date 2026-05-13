@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, NumberInput, Button, Group, Stack } from '@mantine/core';
+import { Modal, NumberInput, Button, Group, Stack, Checkbox, Divider, Title } from '@mantine/core';
 
 interface FiltersModalProps {
   opened: boolean;
@@ -8,9 +8,25 @@ interface FiltersModalProps {
   setBedroomsCount: (value: number | null) => void;
   bedsCount: number | null;
   setBedsCount: (value: number | null) => void;
+  selectedAmenities: string[];
+  setSelectedAmenities: (value: string[]) => void;
   onApply: () => void;
   onReset: () => void;
 }
+
+// Список доступных удобств
+const AMENITIES_LIST = [
+  "Wi-Fi",
+  "Парковка",
+  "Кухня",
+  "Кондиционер",
+  "Стиральная машина",
+  "Телевизор",
+  "Фен",
+  "Утюг",
+  "Домашние животные разрешены",
+  "Бассейн"
+];
 
 export const FiltersModal: React.FC<FiltersModalProps> = ({
   opened,
@@ -19,6 +35,8 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
   setBedroomsCount,
   bedsCount,
   setBedsCount,
+  selectedAmenities,
+  setSelectedAmenities,
   onApply,
   onReset,
 }) => {
@@ -26,10 +44,32 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
     onApply();
     onClose();
   };
-  
+
+  const handleReset = () => {
+    setBedroomsCount(null);
+    setBedsCount(null);
+    setSelectedAmenities([]);
+    onReset();
+  };
+
+  const toggleAmenity = (amenity: string) => {
+    if (selectedAmenities.includes(amenity)) {
+      setSelectedAmenities(selectedAmenities.filter(a => a !== amenity));
+    } else {
+      setSelectedAmenities([...selectedAmenities, amenity]);
+    }
+  };
+
   return (
-    <Modal opened={opened} onClose={onClose} title="Фильтры" size="md">
+    <Modal 
+      opened={opened} 
+      onClose={onClose} 
+      title="Фильтры" 
+      size="md"
+      zIndex={1000}
+    >
       <Stack gap="md">
+        {/* Фильтры по спальням и кроватям */}
         <NumberInput
           label="Количество спален"
           placeholder="Не важно"
@@ -47,10 +87,26 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
           min={0}
           max={30}
         />
+
+        <Divider my="sm" label="Удобства" labelPosition="center" />
+
+        {/* Сетка с чекбоксами удобств */}
+        <Group grow preventGrowOverflow={false}>
+          {AMENITIES_LIST.map((amenity) => (
+            <Checkbox
+              key={amenity}
+              label={amenity}
+              checked={selectedAmenities.includes(amenity)}
+              onChange={() => toggleAmenity(amenity)}
+            />
+          ))}
+        </Group>
         
+        <Divider my="sm" />
+
         <Group justify="space-between" mt="md">
-          <Button variant="default" onClick={onReset}>
-            Сбросить
+          <Button variant="default" onClick={handleReset}>
+            Сбросить все
           </Button>
           <Button onClick={handleApply}>Применить</Button>
         </Group>
