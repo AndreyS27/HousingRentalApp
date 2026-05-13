@@ -33,3 +33,16 @@ export interface SearchResponse {
   pageSize: number;
   totalPages: number;
 }
+
+export interface PropertyDetails extends PropertySummary {
+  description: string;
+  address: string;
+  bathroomsCount: number;
+  isActive: boolean;
+  ownerName: string;
+  propertyType: string;
+  amenities: string[];
+  photos: string[];
+  reviewsCount: number;
+  createdAt: string;
+}

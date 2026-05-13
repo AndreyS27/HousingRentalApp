@@ -24,6 +24,7 @@ import { propertiesApi } from '../../api/propertiesApi';
 import { geocodeCity } from '../../api/geocodingApi';
 import { PropertySummary, SearchParams } from '../../types';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
 export const HomePage: React.FC = () => {
   const [city, setCity] = useState('Москва');
@@ -33,6 +34,7 @@ export const HomePage: React.FC = () => {
   const [filtersOpened, setFiltersOpened] = useState(false);
   const [bedroomsCount, setBedroomsCount] = useState<number | null>(null);
   const [bedsCount, setBedsCount] = useState<number | null>(null);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
   const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +57,7 @@ export const HomePage: React.FC = () => {
         guestsCount: guestsCount || undefined,
         bedroomsCount: bedroomsCount || undefined,
         bedsCount: bedsCount || undefined,
+        amenities: selectedAmenities.length > 0 ? selectedAmenities : undefined, // ← Добавьте эту строку
         page: 1,
         pageSize: 10,
       };
@@ -68,15 +71,11 @@ export const HomePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount]);
+  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, selectedAmenities]);
 
   useEffect(() => {
     performSearch();
   }, []);
-
-  const handlePropertySelect = (propertyId: number) => {
-    console.log('Выбран объект:', propertyId);
-  };
 
   const handleApplyFilters = () => {
     performSearch();
@@ -88,6 +87,12 @@ export const HomePage: React.FC = () => {
     performSearch();
   };
 
+  const navigate = useNavigate();
+
+  const handlePropertySelect = (propertyId: number) => {
+    navigate(`/property/${propertyId}`);
+  };
+
   return (
     <Stack gap={0} style={{ height: '100vh' }}>
       {/* Шапка */}
@@ -96,7 +101,7 @@ export const HomePage: React.FC = () => {
           <Stack gap="md">
             <Group justify="space-between">
               <Title order={3} style={{ color: '#339af0' }}>
-                HousingRental
+                X
               </Title>
               <Button variant="default">Войти / Зарегистрироваться</Button>
             </Group>
@@ -192,11 +197,11 @@ export const HomePage: React.FC = () => {
           {/* Правая колонка — карта */}
           <Grid.Col span={6} style={{ height: '750px' }}>
             {/* <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}> */}
-              <PropertyMap
-                properties={properties}
-                cityCoordinates={cityCoordinates}
-                onPropertySelect={handlePropertySelect}
-              />
+            <PropertyMap
+              properties={properties}
+              cityCoordinates={cityCoordinates}
+              onPropertySelect={handlePropertySelect}
+            />
             {/* </Paper> */}
           </Grid.Col>
         </Grid>
@@ -209,6 +214,8 @@ export const HomePage: React.FC = () => {
         setBedroomsCount={setBedroomsCount}
         bedsCount={bedsCount}
         setBedsCount={setBedsCount}
+        selectedAmenities={selectedAmenities}
+        setSelectedAmenities={setSelectedAmenities}
         onApply={handleApplyFilters}
         onReset={handleResetFilters}
       />
