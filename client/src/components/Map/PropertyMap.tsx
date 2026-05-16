@@ -50,9 +50,6 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
               key={property.propertyId}
               position={[property.latitude, property.longitude]}
               icon={DEFAULT_ICON}
-              eventHandlers={{
-                click: () => onPropertySelect(property.propertyId),
-              }}
             >
               <Popup>
                 <div style={{ minWidth: 180 }}>
