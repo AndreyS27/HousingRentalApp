@@ -41,6 +41,8 @@ export const HomePage: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
 
+  const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
+
   const performSearch = useCallback(async () => {
     if (!city.trim()) return;
 
@@ -183,8 +185,11 @@ export const HomePage: React.FC = () => {
                     {properties.map((property) => (
                       <Grid.Col span={6} key={property.propertyId}>
                         <PropertyCard
+                          key={property.propertyId}
                           property={property}
                           onClick={() => handlePropertySelect(property.propertyId)}
+                          onMouseEnter={() => setHoveredPropertyId(property.propertyId)}
+                          onMouseLeave={() => setHoveredPropertyId(null)}
                         />
                       </Grid.Col>
                     ))}
@@ -200,6 +205,7 @@ export const HomePage: React.FC = () => {
             <PropertyMap
               properties={properties}
               cityCoordinates={cityCoordinates}
+              hoveredPropertyId={hoveredPropertyId}
               onPropertySelect={handlePropertySelect}
             />
             {/* </Paper> */}

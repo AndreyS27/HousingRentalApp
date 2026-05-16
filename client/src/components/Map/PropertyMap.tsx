@@ -1,8 +1,9 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Icon } from 'leaflet';
+import { Icon, divIcon } from 'leaflet';
 import { PropertySummary } from '../../types';
-import { Button, Loader, Center, Paper } from '@mantine/core';
+import { Button, Loader, Center, Paper, Image, Text, Group, Badge } from '@mantine/core';
+import { IconBed, IconUsers, IconMapPin } from '@tabler/icons-react';
 
 // Простая иконка маркера через URL
 const DEFAULT_ICON = new Icon({
@@ -13,15 +14,25 @@ const DEFAULT_ICON = new Icon({
   iconAnchor: [12, 41],
 });
 
+// Красная иконка для выделенного маркера
+const HOVERED_ICON = new Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
 interface PropertyMapProps {
   properties: PropertySummary[];
   cityCoordinates: [number, number] | null;
+  hoveredPropertyId: number | null;
   onPropertySelect: (propertyId: number) => void;
 }
 
 export const PropertyMap: React.FC<PropertyMapProps> = ({
   properties,
   cityCoordinates,
+  hoveredPropertyId,
   onPropertySelect,
 }) => {
   if (!cityCoordinates) {
@@ -41,23 +52,51 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
         scrollWheelZoom={true}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        
+
         {properties.map((property) => {
           if (!property.latitude || !property.longitude) return null;
-          
+
+          // Выбираем иконку: красная если выделен, иначе обычная
+          const icon = hoveredPropertyId === property.propertyId ? HOVERED_ICON : DEFAULT_ICON;
+
           return (
             <Marker
               key={property.propertyId}
               position={[property.latitude, property.longitude]}
-              icon={DEFAULT_ICON}
+              icon={icon}
             >
               <Popup>
-                <div style={{ minWidth: 180 }}>
-                  <strong>{property.title}</strong>
-                  <br />
-                  {property.pricePerNight} ₽ / ночь
-                  <br />
-                  <Button size="xs" mt="xs" onClick={() => onPropertySelect(property.propertyId)}>
+                <div style={{ minWidth: 200 }}>
+                  <Image
+                    src={property.mainPhotoUrl || 'https://placehold.co/400x300?text=No+Image'}
+                    height={120}
+                    style={{ objectFit: 'cover', borderRadius: 8 }}
+                  />
+                  <Text fw={600} mt="sm">{property.title}</Text>
+                  <Group gap="xs" mt="xs">
+                    <IconMapPin size={14} />
+                    <Text size="xs" c="dimmed">{property.city}</Text>
+                  </Group>
+                  <Group gap="md" mt="xs">
+                    <Group gap="xs">
+                      <IconUsers size={14} />
+                      <Text size="xs">{property.guestsCount} гостей</Text>
+                    </Group>
+                    <Group gap="xs">
+                      <IconBed size={14} />
+                      <Text size="xs">{property.bedroomsCount} спальни</Text>
+                    </Group>
+                  </Group>
+                  <Text fw={700} mt="sm">
+                    {property.pricePerNight.toLocaleString()} ₽
+                    <Text component="span" size="xs" c="dimmed"> / ночь</Text>
+                  </Text>
+                  <Button
+                    size="xs"
+                    fullWidth
+                    mt="sm"
+                    onClick={() => onPropertySelect(property.propertyId)}
+                  >
                     Подробнее
                   </Button>
                 </div>

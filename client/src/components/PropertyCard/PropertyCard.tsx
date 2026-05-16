@@ -6,9 +6,16 @@ import { PropertySummary } from '../../types';
 interface PropertyCardProps {
   property: PropertySummary;
   onClick: () => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 }
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
+export const PropertyCard: React.FC<PropertyCardProps> = ({
+  property,
+  onClick,
+  onMouseEnter,
+  onMouseLeave 
+}) => {
   return (
     <Card
       shadow="sm"
@@ -16,6 +23,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick })
       radius="md"
       withBorder
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={{ cursor: 'pointer' }}
     >
       <Card.Section>

@@ -246,6 +246,7 @@ export const PropertyDetailsPage: React.FC = () => {
             <Paper shadow="sm" radius="md" mt="md" style={{ height: 300, overflow: 'hidden' }}>
               <PropertyMap
                 properties={[property]}
+                hoveredPropertyId={null}
                 cityCoordinates={cityCoordinates}
                 onPropertySelect={() => {}}
               />
