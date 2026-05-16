@@ -22,6 +22,7 @@ export interface SearchParams {
   propertyTypeId?: number;
   bedroomsCount?: number;
   bedsCount?: number;
+  amenities?: string[];
   page: number;
   pageSize: number;
 }

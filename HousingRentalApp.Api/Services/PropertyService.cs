@@ -196,7 +196,9 @@ namespace HousingRentalApp.Api.Services
                 PricePerNight = property.PricePerNight,
                 AverageRating = averageRating,
                 GuestsCount = property.GuestsCount,
-                BedroomsCount = property.BedroomsCount
+                BedroomsCount = property.BedroomsCount,
+                Latitude = property.Latitude,
+                Longitude = property.Longitude,
             };
         }
     }
