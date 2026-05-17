@@ -1,21 +1,24 @@
 // Сервис для преобразования названия города в координаты
+import api from "./client";
+
+interface GeocodeResponse {
+  lat: string;
+  lon: string;
+  displayName: string;
+}
+
 export const geocodeCity = async (cityName: string): Promise<[number, number] | null> => {
   if (!cityName) return null;
   
   try {
     // Nominatim API OpenStreetMap
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`
-    );
+    const response = await api.get<GeocodeResponse>('/geocode/city', {
+      params: {city: cityName}
+    })
     
-    const data = await response.json();
-    
-    if (data && data.length > 0) {
-      const lat = parseFloat(data[0].lat);
-      const lon = parseFloat(data[0].lon);
-      return [lat, lon];
-    }
-    return null;
+    const { lat, lon} = response.data;
+    return [parseFloat(lat), parseFloat(lon)];
+
   } catch (error) {
     console.error('Ошибка геокодинга:', error);
     return null;

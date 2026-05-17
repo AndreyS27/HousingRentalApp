@@ -1,8 +1,8 @@
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Icon, divIcon } from 'leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { Icon } from 'leaflet';
 import { PropertySummary } from '../../types';
-import { Button, Loader, Center, Paper, Image, Text, Group, Badge } from '@mantine/core';
+import { Button, Loader, Center, Paper, Image, Text, Group } from '@mantine/core';
 import { IconBed, IconUsers, IconMapPin } from '@tabler/icons-react';
 
 // Простая иконка маркера через URL
@@ -21,6 +21,15 @@ const HOVERED_ICON = new Icon({
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
+
+// Компонент для обновления центра карты при изменении координат
+function ChangeMapView({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
+}
 
 interface PropertyMapProps {
   properties: PropertySummary[];
@@ -51,6 +60,9 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
       >
+        {/* Компонент для обновления центра карты */}
+        <ChangeMapView center={cityCoordinates} zoom={12} />
+
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
         {properties.map((property) => {
