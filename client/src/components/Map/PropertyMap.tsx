@@ -35,7 +35,6 @@ interface PropertyMapProps {
   properties: PropertySummary[];
   cityCoordinates: [number, number] | null;
   hoveredPropertyId: number | null;
-  // onPropertySelect: (propertyId: number) => void;
 }
 
 export const PropertyMap: React.FC<PropertyMapProps> = ({

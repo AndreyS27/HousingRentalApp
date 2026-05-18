@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, Image, Text, Badge, Group } from '@mantine/core';
 import { IconBed, IconUsers, IconMapPin } from '@tabler/icons-react';
 import { PropertySummary } from '../../types';
-import { Link } from 'react-router-dom';
 
 interface PropertyCardProps {
   property: PropertySummary;

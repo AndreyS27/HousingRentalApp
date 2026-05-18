@@ -9,7 +9,6 @@ import {
   Stack,
   Loader,
   Center,
-  Title,
   Alert,
   Text,
   ScrollArea,
@@ -34,6 +33,7 @@ export const SearchPage: React.FC = () => {
   const initialCheckOut = searchParams.get('checkOut');
   const initialGuests = searchParams.get('guests');
 
+  // состояние формы поиска
   const [city, setCity] = useState(initialCity);
   const [dateRange, setDateRange] = useState<DatesRangeValue>([
     initialCheckIn ? new Date(initialCheckIn) : null,
@@ -43,19 +43,18 @@ export const SearchPage: React.FC = () => {
     initialGuests ? parseInt(initialGuests) : null
   );
 
+  // состояние фильтров
   const [filtersOpened, setFiltersOpened] = useState(false);
   const [bedroomsCount, setBedroomsCount] = useState<number | null>(null);
   const [bedsCount, setBedsCount] = useState<number | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
+  // состояние данных
   const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
-
   const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
-
-  const currentSearchParams = searchParams.toString();
 
   const performSearch = useCallback(async () => {
     if (!city.trim()) return;
@@ -91,7 +90,7 @@ export const SearchPage: React.FC = () => {
 
   useEffect(() => {
     performSearch();
-  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount]);
+  }, []);
 
   const handleApplyFilters = () => {
     performSearch();
@@ -100,6 +99,7 @@ export const SearchPage: React.FC = () => {
   const handleResetFilters = () => {
     setBedroomsCount(null);
     setBedsCount(null);
+    setSelectedAmenities([]);
     performSearch();
   };
 
