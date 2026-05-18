@@ -57,12 +57,6 @@ export const SearchPage: React.FC = () => {
 
   const currentSearchParams = searchParams.toString();
 
-  const handlePropertySelect = (propertyId: number) => {
-    navigate(`/property/${propertyId}`, {
-      state: { returnSearchParams: currentSearchParams }
-    });
-  };
-
   const performSearch = useCallback(async () => {
     if (!city.trim()) return;
 
@@ -211,7 +205,6 @@ export const SearchPage: React.FC = () => {
                         <PropertyCard
                           key={property.propertyId}
                           property={property}
-                          onClick={() => handlePropertySelect(property.propertyId)}
                           onMouseEnter={() => setHoveredPropertyId(property.propertyId)}
                           onMouseLeave={() => setHoveredPropertyId(null)}
                         />
@@ -230,7 +223,6 @@ export const SearchPage: React.FC = () => {
               properties={properties}
               cityCoordinates={cityCoordinates}
               hoveredPropertyId={hoveredPropertyId}
-              onPropertySelect={handlePropertySelect}
             />
             {/* </Paper> */}
           </Grid.Col>

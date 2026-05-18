@@ -35,15 +35,20 @@ interface PropertyMapProps {
   properties: PropertySummary[];
   cityCoordinates: [number, number] | null;
   hoveredPropertyId: number | null;
-  onPropertySelect: (propertyId: number) => void;
+  // onPropertySelect: (propertyId: number) => void;
 }
 
 export const PropertyMap: React.FC<PropertyMapProps> = ({
   properties,
   cityCoordinates,
   hoveredPropertyId,
-  onPropertySelect,
 }) => {
+
+  const handleOpenInNewTab = (propertyId: number) => {
+    const url = `${window.location.origin}/property/${propertyId}`;
+    window.open(url, '_blank');
+  };
+
   if (!cityCoordinates) {
     return (
       <Center style={{ height: 400 }}>
@@ -107,7 +112,7 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
                     size="xs"
                     fullWidth
                     mt="sm"
-                    onClick={() => onPropertySelect(property.propertyId)}
+                    onClick={() => handleOpenInNewTab(property.propertyId)}
                   >
                     Подробнее
                   </Button>

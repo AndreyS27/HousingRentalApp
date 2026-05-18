@@ -6,26 +6,30 @@ import { Link } from 'react-router-dom';
 
 interface PropertyCardProps {
   property: PropertySummary;
-  onClick: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
-  onClick,
   onMouseEnter,
   onMouseLeave
 }) => {
+
+  const propertyUrl = `${window.location.origin}/property/${property.propertyId}`;
+
+  const handleOpenInNewTab = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.open(propertyUrl, '_blank');
+  };
+
   return (
     <Card
       shadow="sm"
       padding="lg"
       radius="md"
       withBorder
-      component={Link}
-      to={`/property/${property.propertyId}`}
-      onClick={onClick}
+      onClick={handleOpenInNewTab}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{ cursor: 'pointer' }}
