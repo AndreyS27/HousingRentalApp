@@ -33,7 +33,7 @@ export const PropertyDetailsPage: React.FC = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       try {
         const response = await propertiesApi.getById(parseInt(id));
@@ -67,9 +67,9 @@ export const PropertyDetailsPage: React.FC = () => {
     );
   }
 
-  const cityCoordinates: [number, number] | null = 
-    property.latitude && property.longitude 
-      ? [property.latitude, property.longitude] 
+  const cityCoordinates: [number, number] | null =
+    property.latitude && property.longitude
+      ? [property.latitude, property.longitude]
       : null;
 
   return (
@@ -87,7 +87,12 @@ export const PropertyDetailsPage: React.FC = () => {
                 На главную
               </Button>
             </Group>
-            <Button variant="default">Войти / Зарегистрироваться</Button>
+            <Button
+              variant="default"
+              onClick={() => navigate('login')}
+            >
+              Войти / Зарегистрироваться
+            </Button>
           </Group>
         </Container>
       </Paper>

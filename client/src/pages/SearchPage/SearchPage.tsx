@@ -120,9 +120,13 @@ export const SearchPage: React.FC = () => {
                 >
                   На главную
                 </Button>
-                {/* <Title order={3} style={{ color: '#339af0' }}>X</Title> */}
               </Group>
-              <Button variant="default">Войти / Зарегистрироваться</Button>
+              <Button
+                variant="default"
+                onClick={() => navigate('/login')}
+              >
+                Войти / Зарегистрироваться
+              </Button>
             </Group>
 
 

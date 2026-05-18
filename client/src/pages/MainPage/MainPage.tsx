@@ -25,7 +25,7 @@ export const MainPage: React.FC = () => {
 
     const params = new URLSearchParams();
     params.set('city', city);
-    
+
     if (dateRange[0]) {
       params.set('checkIn', dayjs(dateRange[0]).format('YYYY-MM-DD'));
     }
@@ -35,7 +35,7 @@ export const MainPage: React.FC = () => {
     if (guestsCount) {
       params.set('guests', guestsCount.toString());
     }
-    
+
     navigate(`/search?${params.toString()}`);
   };
 
@@ -48,7 +48,12 @@ export const MainPage: React.FC = () => {
               <Title order={3} style={{ color: '#339af0' }}>
                 X
               </Title>
-              <Button variant="default">Войти / Зарегистрироваться</Button>
+              <Button
+                variant="default"
+                onClick={() => navigate('/login')}
+              >
+                Войти / Зарегистрироваться
+              </Button>
             </Group>
           </Stack>
         </Container>
@@ -60,7 +65,7 @@ export const MainPage: React.FC = () => {
             <Title order={2} ta="center" mb="md">
               Найдите идеальное жильё
             </Title>
-            
+
             <TextInput
               size="lg"
               label="Город"
