@@ -22,6 +22,7 @@ import { IconMapPin, IconUsers, IconBed, IconBath, IconCalendar, IconHeart, Icon
 import { propertiesApi } from '../../api/propertiesApi';
 import { PropertyDetails } from '../../types';
 import { PropertyMap } from '../../components/Map/PropertyMap';
+import { Header } from '../../components/Layout/Header/Header';
 
 export const PropertyDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,27 +76,7 @@ export const PropertyDetailsPage: React.FC = () => {
   return (
     <>
       {/* Шапка */}
-      <Paper shadow="xs" p="md" radius={0}>
-        <Container size="xl">
-          <Group justify="space-between">
-            <Group>
-              <Button
-                variant="subtle"
-                onClick={() => navigate('/')}
-                leftSection={<IconArrowLeft size={16} />}
-              >
-                На главную
-              </Button>
-            </Group>
-            <Button
-              variant="default"
-              onClick={() => navigate('login')}
-            >
-              Войти / Зарегистрироваться
-            </Button>
-          </Group>
-        </Container>
-      </Paper>
+      <Header />
 
       <Container size="xl" py="xl">
         {/* Галерея фотографий */}

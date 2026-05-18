@@ -13,6 +13,7 @@ import {
 import { IconSearch, IconCalendar, IconUsers } from '@tabler/icons-react';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
 import dayjs from 'dayjs';
+import { Header } from '../../components/Layout/Header/Header';
 
 export const MainPage: React.FC = () => {
   const navigate = useNavigate();
@@ -41,23 +42,7 @@ export const MainPage: React.FC = () => {
 
   return (
     <Box style={{ height: '100vh', backgroundColor: '#f5f5f5' }}>
-      <Paper shadow="xs" p="md" radius={0}>
-        <Container size="xl">
-          <Stack gap="md">
-            <Group justify="space-between">
-              <Title order={3} style={{ color: '#339af0' }}>
-                X
-              </Title>
-              <Button
-                variant="default"
-                onClick={() => navigate('/login')}
-              >
-                Войти / Зарегистрироваться
-              </Button>
-            </Group>
-          </Stack>
-        </Container>
-      </Paper>
+      <Header />
 
       <Container size="md" style={{ marginTop: '15vh' }}>
         <Paper shadow="lg" p="xl" radius="md" withBorder>

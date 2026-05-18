@@ -23,6 +23,8 @@ import { geocodeCity } from '../../api/geocodingApi';
 import { PropertySummary, SearchParams } from '../../types';
 import dayjs from 'dayjs';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Header } from '../../components/Layout/Header/Header';
+
 
 export const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -108,81 +110,58 @@ export const SearchPage: React.FC = () => {
   return (
     <Stack gap={0} style={{ height: '100vh' }}>
       {/* Шапка */}
-      <Paper shadow="xs" p="md" radius={0} style={{ flexShrink: 0 }}>
-        <Container size="xl">
-          <Stack gap="md">
-            <Group justify="space-between">
-              <Group>
-                <Button
-                  variant="subtle"
-                  onClick={() => navigate('/')}
-                  leftSection={<IconArrowLeft size={16} />}
-                >
-                  На главную
-                </Button>
-              </Group>
-              <Button
-                variant="default"
-                onClick={() => navigate('/login')}
-              >
-                Войти / Зарегистрироваться
-              </Button>
-            </Group>
+      <Header withSearch>
+        <Grid grow align="flex-end">
+          <Grid.Col span={3}>
+            <TextInput
+              label="Город"
+              placeholder="Введите город"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              leftSection={<IconSearch size={16} />}
+            />
+          </Grid.Col>
 
+          <Grid.Col span={4}>
+            <DatePickerInput
+              type="range"
+              label="Даты"
+              placeholder="Выберите даты"
+              value={dateRange}
+              onChange={setDateRange}
+              leftSection={<IconCalendar size={16} />}
+            />
+          </Grid.Col>
 
-            <Grid grow align="flex-end">
-              <Grid.Col span={3}>
-                <TextInput
-                  label="Город"
-                  placeholder="Введите город"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  leftSection={<IconSearch size={16} />}
-                />
-              </Grid.Col>
+          <Grid.Col span={3}>
+            <TextInput
+              label="Количество гостей"
+              placeholder="1-10"
+              type="number"
+              value={guestsCount || ''}
+              onChange={(e) => setGuestsCount(e.target.value ? Number(e.target.value) : null)}
+              leftSection={<IconUsers size={16} />}
+            />
+          </Grid.Col>
 
-              <Grid.Col span={4}>
-                <DatePickerInput
-                  type="range"
-                  label="Даты"
-                  placeholder="Выберите даты"
-                  value={dateRange}
-                  onChange={setDateRange}
-                  leftSection={<IconCalendar size={16} />}
-                />
-              </Grid.Col>
+          <Grid.Col span={2}>
+            <Button fullWidth onClick={performSearch} loading={loading}>
+              Найти
+            </Button>
+          </Grid.Col>
 
-              <Grid.Col span={3}>
-                <TextInput
-                  label="Количество гостей"
-                  placeholder="1-10"
-                  type="number"
-                  value={guestsCount || ''}
-                  onChange={(e) => setGuestsCount(e.target.value ? Number(e.target.value) : null)}
-                  leftSection={<IconUsers size={16} />}
-                />
-              </Grid.Col>
-
-              <Grid.Col span={2}>
-                <Button fullWidth onClick={performSearch} loading={loading}>
-                  Найти
-                </Button>
-              </Grid.Col>
-
-              <Grid.Col span={1}>
-                <Button
-                  variant="light"
-                  fullWidth
-                  onClick={() => setFiltersOpened(true)}
-                  leftSection={<IconFilter size={16} />}
-                >
-                  Фильтры
-                </Button>
-              </Grid.Col>
-            </Grid>
-          </Stack>
-        </Container>
-      </Paper>
+          <Grid.Col span={1}>
+            <Button
+              variant="light"
+              fullWidth
+              onClick={() => setFiltersOpened(true)}
+              leftSection={<IconFilter size={16} />}
+            >
+              Фильтры
+            </Button>
+          </Grid.Col>
+        </Grid>
+      </Header>
 
       {/* Основной контент */}
       <div style={{ flex: 1, minHeight: 0, padding: '16px' }}>
