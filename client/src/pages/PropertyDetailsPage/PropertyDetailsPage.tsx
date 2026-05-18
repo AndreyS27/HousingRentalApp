@@ -77,7 +77,7 @@ export const PropertyDetailsPage: React.FC = () => {
   return (
     <Container size="xl" py="xl">
       {/* Кнопка назад */}
-      <Button variant="subtle" onClick={() => navigate('/')} mb="md">
+      <Button variant="subtle" onClick={() => navigate('/search')} mb="md">
         ← Назад к поиску
       </Button>
 

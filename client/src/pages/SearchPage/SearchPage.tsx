@@ -1,0 +1,254 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container,
+  Grid,
+  Paper,
+  TextInput,
+  Button,
+  Group,
+  Stack,
+  Loader,
+  Center,
+  Title,
+  Alert,
+  Text,
+  ScrollArea,
+} from '@mantine/core';
+import { IconSearch, IconFilter, IconCalendar, IconUsers, IconArrowLeft } from '@tabler/icons-react';
+import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
+import { PropertyCard } from '../../components/PropertyCard/PropertyCard';
+import { PropertyMap } from '../../components/Map/PropertyMap';
+import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
+import { propertiesApi } from '../../api/propertiesApi';
+import { geocodeCity } from '../../api/geocodingApi';
+import { PropertySummary, SearchParams } from '../../types';
+import dayjs from 'dayjs';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
+export const SearchPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const initialCity = searchParams.get('city') || 'Москва';
+  const initialCheckIn = searchParams.get('checkIn');
+  const initialCheckOut = searchParams.get('checkOut');
+  const initialGuests = searchParams.get('guests');
+
+  const [city, setCity] = useState(initialCity);
+  const [dateRange, setDateRange] = useState<DatesRangeValue>([
+    initialCheckIn ? new Date(initialCheckIn) : null,
+    initialCheckOut ? new Date(initialCheckOut) : null,
+  ]);
+  const [guestsCount, setGuestsCount] = useState<number | null>(
+    initialGuests ? parseInt(initialGuests) : null
+  );
+
+  const [filtersOpened, setFiltersOpened] = useState(false);
+  const [bedroomsCount, setBedroomsCount] = useState<number | null>(null);
+  const [bedsCount, setBedsCount] = useState<number | null>(null);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+
+  const [properties, setProperties] = useState<PropertySummary[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
+
+  const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
+
+  const currentSearchParams = searchParams.toString();
+
+  const handlePropertySelect = (propertyId: number) => {
+    navigate(`/property/${propertyId}`, {
+      state: { returnSearchParams: currentSearchParams }
+    });
+  };
+
+  const performSearch = useCallback(async () => {
+    if (!city.trim()) return;
+
+    setLoading(true);
+
+    try {
+      const coords = await geocodeCity(city);
+      setCityCoordinates(coords);
+
+      const params: SearchParams = {
+        city: city,
+        checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
+        checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
+        guestsCount: guestsCount || undefined,
+        bedroomsCount: bedroomsCount || undefined,
+        bedsCount: bedsCount || undefined,
+        amenities: selectedAmenities.length > 0 ? selectedAmenities : undefined,
+        page: 1,
+        pageSize: 10,
+      };
+
+      const response = await propertiesApi.search(params);
+      setProperties(response.data.properties || []);
+      setTotalCount(response.data.totalCount || 0);
+
+    } catch (error) {
+      console.error('Ошибка поиска:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, selectedAmenities]);
+
+  useEffect(() => {
+    performSearch();
+  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount]);
+
+  const handleApplyFilters = () => {
+    performSearch();
+  };
+
+  const handleResetFilters = () => {
+    setBedroomsCount(null);
+    setBedsCount(null);
+    performSearch();
+  };
+
+
+
+  return (
+    <Stack gap={0} style={{ height: '100vh' }}>
+      {/* Шапка */}
+      <Paper shadow="xs" p="md" radius={0} style={{ flexShrink: 0 }}>
+        <Container size="xl">
+          <Stack gap="md">
+            <Group justify="space-between">
+              <Group>
+                <Button
+                  variant="subtle"
+                  onClick={() => navigate('/')}
+                  leftSection={<IconArrowLeft size={16} />}
+                >
+                  На главную
+                </Button>
+                {/* <Title order={3} style={{ color: '#339af0' }}>X</Title> */}
+              </Group>
+              <Button variant="default">Войти / Зарегистрироваться</Button>
+            </Group>
+
+
+            <Grid grow align="flex-end">
+              <Grid.Col span={3}>
+                <TextInput
+                  label="Город"
+                  placeholder="Введите город"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  leftSection={<IconSearch size={16} />}
+                />
+              </Grid.Col>
+
+              <Grid.Col span={4}>
+                <DatePickerInput
+                  type="range"
+                  label="Даты"
+                  placeholder="Выберите даты"
+                  value={dateRange}
+                  onChange={setDateRange}
+                  leftSection={<IconCalendar size={16} />}
+                />
+              </Grid.Col>
+
+              <Grid.Col span={3}>
+                <TextInput
+                  label="Количество гостей"
+                  placeholder="1-10"
+                  type="number"
+                  value={guestsCount || ''}
+                  onChange={(e) => setGuestsCount(e.target.value ? Number(e.target.value) : null)}
+                  leftSection={<IconUsers size={16} />}
+                />
+              </Grid.Col>
+
+              <Grid.Col span={2}>
+                <Button fullWidth onClick={performSearch} loading={loading}>
+                  Найти
+                </Button>
+              </Grid.Col>
+
+              <Grid.Col span={1}>
+                <Button
+                  variant="light"
+                  fullWidth
+                  onClick={() => setFiltersOpened(true)}
+                  leftSection={<IconFilter size={16} />}
+                >
+                  Фильтры
+                </Button>
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        </Container>
+      </Paper>
+
+      {/* Основной контент */}
+      <div style={{ flex: 1, minHeight: 0, padding: '16px' }}>
+        <Grid style={{ height: '100%' }}>
+          {/* Левая колонка — карточки с использованием ScrollArea */}
+          <Grid.Col span={6} style={{ height: '100%' }}>
+            {loading ? (
+              <Center style={{ height: '100%' }}>
+                <Loader size="xl" />
+              </Center>
+            ) : properties.length === 0 ? (
+              <Center style={{ height: '100%' }}>
+                <Alert color="yellow" title="Ничего не найдено">
+                  Попробуйте изменить параметры поиска или город
+                </Alert>
+              </Center>
+            ) : (
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Text mb="md">Найдено: {totalCount} объектов</Text>
+                <ScrollArea offsetScrollbars h="100vh">
+                  <Grid gutter="md">
+                    {properties.map((property) => (
+                      <Grid.Col span={6} key={property.propertyId}>
+                        <PropertyCard
+                          key={property.propertyId}
+                          property={property}
+                          onClick={() => handlePropertySelect(property.propertyId)}
+                          onMouseEnter={() => setHoveredPropertyId(property.propertyId)}
+                          onMouseLeave={() => setHoveredPropertyId(null)}
+                        />
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                </ScrollArea>
+              </div>
+            )}
+          </Grid.Col>
+
+          {/* Правая колонка — карта */}
+          <Grid.Col span={6} style={{ height: '750px' }}>
+            {/* <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}> */}
+            <PropertyMap
+              properties={properties}
+              cityCoordinates={cityCoordinates}
+              hoveredPropertyId={hoveredPropertyId}
+              onPropertySelect={handlePropertySelect}
+            />
+            {/* </Paper> */}
+          </Grid.Col>
+        </Grid>
+      </div>
+
+      <FiltersModal
+        opened={filtersOpened}
+        onClose={() => setFiltersOpened(false)}
+        bedroomsCount={bedroomsCount}
+        setBedroomsCount={setBedroomsCount}
+        bedsCount={bedsCount}
+        setBedsCount={setBedsCount}
+        selectedAmenities={selectedAmenities}
+        setSelectedAmenities={setSelectedAmenities}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+      />
+    </Stack>
+  );
+};
