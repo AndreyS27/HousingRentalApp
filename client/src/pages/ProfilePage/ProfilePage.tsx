@@ -10,6 +10,7 @@ import {
   Group,
   Divider,
   Box,
+  Grid,
 } from '@mantine/core';
 import { IconMail, IconUser, IconUserCircle } from '@tabler/icons-react';
 import { Header } from '../../components/Layout/Header/Header';
@@ -18,9 +19,12 @@ import { RootState } from '../../store';
 export const ProfilePage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const getInitials = () => {
-    if (!user) return '';
-    return `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
+  // Функция для получения URL аватара или заглушки
+  const getAvatarUrl = () => {
+    if (user?.avatarUrl) {
+      return user.avatarUrl;
+    }
+    return 'https://placekitten.com/150/150';
   };
 
   if (!user) {
@@ -46,31 +50,42 @@ export const ProfilePage: React.FC = () => {
               Личный кабинет
             </Title>
 
-            <Group justify="center">
-              <Avatar size={120} color="blue" radius="xl">
-                {getInitials()}
-              </Avatar>
-            </Group>
-
             <Divider />
 
-            <Group gap="md">
-              <IconUserCircle size={20} />
-              <Text fw={500}>Имя:</Text>
-              <Text>{user.firstName}</Text>
-            </Group>
+            <Grid gutter="xl" align="center">
+              {/* Левая колонка: фото */}
+              <Grid.Col span={4} style={{ textAlign: 'center' }}>
+                <Avatar
+                  src={getAvatarUrl()}
+                  size={150}
+                  radius="xl"
+                  color="blue"
+                />
+              </Grid.Col>
 
-            <Group gap="md">
-              <IconUserCircle size={20} />
-              <Text fw={500}>Фамилия:</Text>
-              <Text>{user.lastName}</Text>
-            </Group>
+              {/* Правая колонка: информация о пользователе */}
+              <Grid.Col span={8}>
+                <Stack gap="md">
+                  <Group gap="md">
+                    <IconUserCircle size={20} />
+                    <Text fw={500}>Имя:</Text>
+                    <Text>{user.firstName}</Text>
+                  </Group>
 
-            <Group gap="md">
-              <IconMail size={20} />
-              <Text fw={500}>Email:</Text>
-              <Text>{user.email}</Text>
-            </Group>
+                  <Group gap="md">
+                    <IconUserCircle size={20} />
+                    <Text fw={500}>Фамилия:</Text>
+                    <Text>{user.lastName}</Text>
+                  </Group>
+
+                  <Group gap="md">
+                    <IconMail size={20} />
+                    <Text fw={500}>Email:</Text>
+                    <Text>{user.email}</Text>
+                  </Group>
+                </Stack>
+              </Grid.Col>
+            </Grid>
           </Stack>
         </Paper>
       </Container>
