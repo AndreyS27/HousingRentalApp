@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ withSearch = false, children }) 
                 fw={700}
                 style={{ color: '#339af0', cursor: 'pointer', textDecoration: 'none' }}
               >
-                HousingRental
+                Logo
               </Text>
             </Group>
 

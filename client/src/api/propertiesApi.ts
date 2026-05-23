@@ -2,9 +2,13 @@ import api from './client';
 import { PropertyDetails, PropertySummary, SearchParams, SearchResponse } from '../types';
 
 export const propertiesApi = {
-  search: (params: SearchParams) => 
+  search: (params: SearchParams) =>
     api.get<SearchResponse>('/properties/search', { params }),
 
-  getById: (id: number) => 
+  getById: (id: number) =>
     api.get<PropertyDetails>(`/properties/${id}`),
+  getMyProperties: () => api.get<PropertySummary[]>('/properties/my'),
+  update: (id: number, data: { title: string; pricePerNight: number; address: string }) =>
+    api.put(`/properties/${id}`, data),
+  delete: (id: number) => api.delete(`/properties/${id}`),
 };

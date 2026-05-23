@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Container,
@@ -9,22 +9,22 @@ import {
   Avatar,
   Group,
   Divider,
-  Box,
   Grid,
+  Tabs,
 } from '@mantine/core';
-import { IconMail, IconUser, IconUserCircle } from '@tabler/icons-react';
+import { IconUser, IconCalendar, IconHome, IconMail, IconUserCircle } from '@tabler/icons-react';
 import { Header } from '../../components/Layout/Header/Header';
 import { RootState } from '../../store';
+import { RenterPanel } from '../../components/Profile/RenterPanel';
+import { LandlordPanel } from '../../components/Profile/LandlordPanel';
 
 export const ProfilePage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const [activeTab, setActiveTab] = useState<string | null>('profile');
 
-  // Функция для получения URL аватара или заглушки
-  const getAvatarUrl = () => {
-    if (user?.avatarUrl) {
-      return user.avatarUrl;
-    }
-    return 'https://placekitten.com/150/150';
+  const getInitials = () => {
+    if (!user) return '';
+    return `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
   };
 
   if (!user) {
@@ -43,50 +43,61 @@ export const ProfilePage: React.FC = () => {
   return (
     <>
       <Header />
-      <Container size="md" style={{ marginTop: '5vh' }}>
+      <Container size="xl" style={{ marginTop: '2vh', marginBottom: '2vh' }}>
         <Paper shadow="lg" p="xl" radius="md" withBorder>
-          <Stack gap="lg">
-            <Title order={2} ta="center">
-              Личный кабинет
-            </Title>
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List grow mb="md">
+              <Tabs.Tab value="profile" leftSection={<IconUser size={16} />}>
+                Мой профиль
+              </Tabs.Tab>
+              <Tabs.Tab value="renter" leftSection={<IconCalendar size={16} />}>
+                Арендатор
+              </Tabs.Tab>
+              <Tabs.Tab value="landlord" leftSection={<IconHome size={16} />}>
+                Арендодатель
+              </Tabs.Tab>
+            </Tabs.List>
 
-            <Divider />
+            <Tabs.Panel value="profile">
+              <Grid gutter="xl" align="center">
+                <Grid.Col span={4} style={{ textAlign: 'center' }}>
+                  <Avatar size={150} radius="xl" color="blue">
+                    {!user.avatarUrl && getInitials()}
+                  </Avatar>
+                </Grid.Col>
 
-            <Grid gutter="xl" align="center">
-              {/* Левая колонка: фото */}
-              <Grid.Col span={4} style={{ textAlign: 'center' }}>
-                <Avatar
-                  src={getAvatarUrl()}
-                  size={150}
-                  radius="xl"
-                  color="blue"
-                />
-              </Grid.Col>
+                <Grid.Col span={8}>
+                  <Stack gap="md">
+                    <Group gap="md">
+                      <IconUserCircle size={20} />
+                      <Text fw={500}>Имя:</Text>
+                      <Text>{user.firstName}</Text>
+                    </Group>
 
-              {/* Правая колонка: информация о пользователе */}
-              <Grid.Col span={8}>
-                <Stack gap="md">
-                  <Group gap="md">
-                    <IconUserCircle size={20} />
-                    <Text fw={500}>Имя:</Text>
-                    <Text>{user.firstName}</Text>
-                  </Group>
+                    <Group gap="md">
+                      <IconUserCircle size={20} />
+                      <Text fw={500}>Фамилия:</Text>
+                      <Text>{user.lastName}</Text>
+                    </Group>
 
-                  <Group gap="md">
-                    <IconUserCircle size={20} />
-                    <Text fw={500}>Фамилия:</Text>
-                    <Text>{user.lastName}</Text>
-                  </Group>
+                    <Group gap="md">
+                      <IconMail size={20} />
+                      <Text fw={500}>Email:</Text>
+                      <Text>{user.email}</Text>
+                    </Group>
+                  </Stack>
+                </Grid.Col>
+              </Grid>
+            </Tabs.Panel>
 
-                  <Group gap="md">
-                    <IconMail size={20} />
-                    <Text fw={500}>Email:</Text>
-                    <Text>{user.email}</Text>
-                  </Group>
-                </Stack>
-              </Grid.Col>
-            </Grid>
-          </Stack>
+            <Tabs.Panel value="renter">
+              <RenterPanel />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="landlord">
+              <LandlordPanel />
+            </Tabs.Panel>
+          </Tabs>
         </Paper>
       </Container>
     </>

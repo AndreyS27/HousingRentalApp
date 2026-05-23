@@ -13,7 +13,7 @@ import {
   Group,
   Alert,
 } from '@mantine/core';
-import { IconMail, IconLock, IconUser, IconUserCircle } from '@tabler/icons-react';
+import { IconMail, IconLock, IconUser, IconUserCircle, IconArrowLeft } from '@tabler/icons-react';
 import { useDispatch } from 'react-redux';
 import { authApi } from '../../api/authApi';
 import { setCredentials } from '../../store/slices/authSlice';
@@ -61,7 +61,7 @@ export const RegisterPage: React.FC = () => {
               <Button
                 variant="subtle"
                 onClick={() => navigate('/')}
-                leftSection={<IconUser size={16} />}
+                leftSection={<IconArrowLeft size={16} />}
               >
                 На главную
               </Button>
