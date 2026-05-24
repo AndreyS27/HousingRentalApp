@@ -107,7 +107,7 @@ namespace HousingRentalApp.Api.Services
                     throw new Exception("Отмена невозможна: до заезда менее 24 часов");
             }
 
-            booking.StatusId = 4; // отменено арендатором
+            booking.StatusId = 3; // отменено арендатором
             await _bookingRepository.UpdateAsync(booking);
 
             // Если был оплачен — создаётся возврат
