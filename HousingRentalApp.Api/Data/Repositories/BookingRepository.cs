@@ -196,5 +196,62 @@ namespace HousingRentalApp.Api.Data.Repositories
             await _context.SaveChangesAsync();
             return expiredBookings.Count;
         }
+
+        public async Task<List<Booking>> GetPastBookingsForRenterAsync(int renterId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.PropertyPhotos)
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.Owner)
+                .Include(b => b.Status)
+                .Where(b => b.RenterId == renterId &&
+                            (b.StatusId == 5 || b.StatusId == 3 || b.StatusId == 4) && // завершено, отменено, отклонено
+                            b.CheckOutDate < DateOnly.FromDateTime(DateTime.UtcNow))
+                .OrderByDescending(b => b.CheckOutDate)
+                .ToListAsync();
+        }
+
+        public async Task<List<Booking>> GetPastBookingsForOwnerAsync(int ownerId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.PropertyPhotos)
+                .Include(b => b.Renter)
+                .Include(b => b.Status)
+                .Where(b => b.Property != null &&
+                            b.Property.OwnerId == ownerId &&
+                            (b.StatusId == 5 || b.StatusId == 3 || b.StatusId == 4))
+                .OrderByDescending(b => b.CheckOutDate)
+                .ToListAsync();
+        }
+
+        public async Task<List<Booking>> GetBookingRequestsForOwnerAsync(int ownerId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.PropertyPhotos)
+                .Include(b => b.Renter)
+                .Include(b => b.Status)
+                .Where(b => b.Property != null &&
+                            b.Property.OwnerId == ownerId &&
+                            b.StatusId == 1) // Ожидает подтверждения
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Booking>> GetCompletedBookingsForOwnerAsync(int ownerId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.PropertyPhotos)
+                .Include(b => b.Renter)
+                .Include(b => b.Status)
+                .Where(b => b.Property != null &&
+                            b.Property.OwnerId == ownerId &&
+                            b.StatusId == 5) // Завершено
+                .OrderByDescending(b => b.CheckOutDate)
+                .ToListAsync();
+        }
     }
 }

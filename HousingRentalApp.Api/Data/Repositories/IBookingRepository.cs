@@ -29,5 +29,10 @@ namespace HousingRentalApp.Api.Data.Repositories
 
         // Автоматическое завершение
         Task<int> CompleteExpiredBookingsAsync();
+
+        Task<List<Booking>> GetPastBookingsForRenterAsync(int renterId);
+        Task<List<Booking>> GetPastBookingsForOwnerAsync(int ownerId);
+        Task<List<Booking>> GetBookingRequestsForOwnerAsync(int ownerId);
+        Task<List<Booking>> GetCompletedBookingsForOwnerAsync(int ownerId);
     }
 }
