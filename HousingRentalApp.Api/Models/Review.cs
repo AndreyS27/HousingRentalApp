@@ -17,7 +17,7 @@ public partial class Review
 
     public string? Comment { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public virtual Booking Booking { get; set; } = null!;
 

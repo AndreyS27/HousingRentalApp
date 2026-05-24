@@ -226,6 +226,52 @@ namespace HousingRentalApp.Api.Services
             return await _bookingRepository.CompleteExpiredBookingsAsync();
         }
 
+        public async Task<List<BookingResponse>> GetMyPastBookingsAsync(int userId)
+        {
+            var bookings = await _bookingRepository.GetPastBookingsForRenterAsync(userId);
+            return bookings.Select(b => MapToResponse(b)).ToList();
+        }
+
+        public async Task<List<BookingResponse>> GetBookingRequestsForOwnerAsync(int ownerId)
+        {
+            var bookings = await _bookingRepository.GetBookingRequestsForOwnerAsync(ownerId);
+            return bookings.Select(b => MapToResponse(b)).ToList();
+        }
+
+        public async Task<List<BookingResponse>> GetPastBookingsForOwnerAsync(int ownerId)
+        {
+            var bookings = await _bookingRepository.GetPastBookingsForOwnerAsync(ownerId);
+            return bookings.Select(b => MapToResponse(b)).ToList();
+        }
+
+        public async Task<List<ReviewResponse>> GetReviewsForOwnerAsync(int ownerId)
+        {
+            var completedBookings = await _bookingRepository.GetCompletedBookingsForOwnerAsync(ownerId);
+
+            var reviews = new List<ReviewResponse>();
+            foreach (var booking in completedBookings)
+            {
+                var review = booking.Review;
+                if (review != null)
+                {
+                    reviews.Add(new ReviewResponse
+                    {
+                        ReviewId = review.ReviewId,
+                        BookingId = review.BookingId,
+                        PropertyId = booking.PropertyId,
+                        Rating = review.Rating,
+                        Comment = review.Comment,
+                        ReviewerName = booking.Renter != null
+                            ? $"{booking.Renter.FirstName} {booking.Renter.LastName}"
+                            : "Неизвестный",
+                        CreatedAt = review.CreatedAt
+                    });
+                }
+            }
+
+            return reviews;
+        }
+
         // Приватный метод для преобразования Booking -> BookingResponse
         private BookingResponse MapToResponse(Booking booking)
         {

@@ -21,5 +21,10 @@ namespace HousingRentalApp.Api.Services
 
         // "фоновый" процесс для поиска завершённых бронирований
         Task<int> CompleteExpiredBookingsAsync();
+
+        Task<List<BookingResponse>> GetMyPastBookingsAsync(int userId);
+        Task<List<BookingResponse>> GetBookingRequestsForOwnerAsync(int ownerId);
+        Task<List<BookingResponse>> GetPastBookingsForOwnerAsync(int ownerId);
+        Task<List<ReviewResponse>> GetReviewsForOwnerAsync(int ownerId);
     }
 }
