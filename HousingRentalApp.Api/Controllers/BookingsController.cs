@@ -186,6 +186,54 @@ namespace HousingRentalApp.Api.Controllers
             return Ok(new { canReview = canReview });
         }
 
+        /// <summary>
+        /// Получить историю бронирований текущего пользователя (завершённые)
+        /// GET /api/bookings/my/past
+        /// </summary>
+        [HttpGet("my/past")]
+        public async Task<IActionResult> GetMyPastBookings()
+        {
+            var userId = GetCurrentUserId();
+            var bookings = await _bookingService.GetMyPastBookingsAsync(userId);
+            return Ok(bookings);
+        }
+
+        /// <summary>
+        /// Получить заявки на бронирование объектов текущего пользователя (арендодатель)
+        /// GET /api/bookings/owner/requests
+        /// </summary>
+        [HttpGet("owner/requests")]
+        public async Task<IActionResult> GetBookingRequestsForOwner()
+        {
+            var userId = GetCurrentUserId();
+            var bookings = await _bookingService.GetBookingRequestsForOwnerAsync(userId);
+            return Ok(bookings);
+        }
+
+        /// <summary>
+        /// Получить историю бронирований объектов текущего пользователя (арендодатель)
+        /// GET /api/bookings/owner/past
+        /// </summary>
+        [HttpGet("owner/past")]
+        public async Task<IActionResult> GetPastBookingsForOwner()
+        {
+            var userId = GetCurrentUserId();
+            var bookings = await _bookingService.GetPastBookingsForOwnerAsync(userId);
+            return Ok(bookings);
+        }
+
+        /// <summary>
+        /// Получить отзывы на объекты текущего пользователя (арендодатель)
+        /// GET /api/bookings/owner/reviews
+        /// </summary>
+        [HttpGet("owner/reviews")]
+        public async Task<IActionResult> GetReviewsForOwner()
+        {
+            var userId = GetCurrentUserId();
+            var reviews = await _bookingService.GetReviewsForOwnerAsync(userId);
+            return Ok(reviews);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
