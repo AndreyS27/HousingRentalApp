@@ -24,3 +24,19 @@ export const geocodeCity = async (cityName: string): Promise<[number, number] | 
     return null;
   }
 };
+
+export const geocodeAddress = async (address: string): Promise<[number, number] | null> => {
+  if (!address) return null;
+  
+  try {
+    const response = await api.get('/geocode/address', {
+      params: { address }
+    });
+    
+    const { lat, lon } = response.data;
+    return [parseFloat(lat), parseFloat(lon)];
+  } catch (error) {
+    console.error('Ошибка геокодинга адреса:', error);
+    return null;
+  }
+};

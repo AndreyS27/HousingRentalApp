@@ -37,6 +37,7 @@ namespace HousingRentalApp.Api.DTOs
         public decimal PricePerNight { get; set; }
 
         public int PropertyTypeId { get; set; }
+        public bool IsActive { get; set; } = true;
         public List<int> AmenityIds { get; set; } = new List<int>();
     }
 }

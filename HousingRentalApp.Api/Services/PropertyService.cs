@@ -1,6 +1,7 @@
 ﻿using HousingRentalApp.Api.Data.Repositories;
 using HousingRentalApp.Api.DTOs;
 using HousingRentalApp.Api.Models;
+using System.Text.Json;
 
 namespace HousingRentalApp.Api.Services
 {
@@ -40,6 +41,22 @@ namespace HousingRentalApp.Api.Services
 
         public async Task<PropertyResponse> CreatePropertyAsync(int ownerId, CreatePropertyRequest request)
         {
+            // Автоматическое получение координат, если они не переданы
+            decimal? latitude = request.Latitude;
+            decimal? longitude = request.Longitude;
+
+            if ((latitude == null || longitude == null) && !string.IsNullOrWhiteSpace(request.Address))
+            {
+                var fullAddress = $"{request.City}, {request.Address}";
+                var coordinates = await GetCoordinatesFromAddressAsync(fullAddress);
+
+                if (coordinates != null)
+                {
+                    latitude = coordinates.Value.Latitude;
+                    longitude = coordinates.Value.Longitude;
+                }
+            }
+
             var property = new Property
             {
                 OwnerId = ownerId,
@@ -47,8 +64,8 @@ namespace HousingRentalApp.Api.Services
                 Description = request.Description,
                 Address = request.Address,
                 City = request.City,
-                Latitude = request.Latitude,
-                Longitude = request.Longitude,
+                Latitude = latitude,
+                Longitude = longitude,
                 GuestsCount = request.GuestsCount,
                 BedroomsCount = request.BedroomsCount,
                 BedsCount = request.BedsCount,
@@ -201,5 +218,37 @@ namespace HousingRentalApp.Api.Services
                 IsActive = property.IsActive
             };
         }
+
+        /// <summary>
+        /// Получение координат по адресу через внешний API
+        /// </summary>
+        private async Task<(decimal Latitude, decimal Longitude)?> GetCoordinatesFromAddressAsync(string address)
+        {
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "HousingRentalApp/1.0 (sampandrey@yandex.ru)");
+
+            var url = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(address)}&format=json&limit=1";
+
+            try
+            {
+                var response = await httpClient.GetAsync(url);
+                var content = await response.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(content);
+                if (doc.RootElement.GetArrayLength() == 0)
+                    return null;
+
+                var firstResult = doc.RootElement[0];
+                var lat = decimal.Parse(firstResult.GetProperty("lat").GetString() ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+                var lon = decimal.Parse(firstResult.GetProperty("lon").GetString() ?? "0", System.Globalization.CultureInfo.InvariantCulture);
+
+                return (lat, lon);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
     }
 }
