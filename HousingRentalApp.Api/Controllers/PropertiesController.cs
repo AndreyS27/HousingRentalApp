@@ -1,7 +1,11 @@
-﻿using HousingRentalApp.Api.DTOs;
+﻿using HousingRentalApp.Api.Data;
+using HousingRentalApp.Api.DTOs;
+using HousingRentalApp.Api.Models;
 using HousingRentalApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Security.Claims;
 
@@ -12,10 +16,14 @@ namespace HousingRentalApp.Api.Controllers
     public class PropertiesController : ControllerBase
     {
         private readonly IPropertyService _propertyService;
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PropertiesController(IPropertyService propertyService)
+        public PropertiesController(IPropertyService propertyService, IWebHostEnvironment webHostEnvironment, ApplicationDbContext context)
         {
             _propertyService = propertyService;
+            _webHostEnvironment = webHostEnvironment;
+            _context = context;
         }
 
         /// <summary>
@@ -70,7 +78,7 @@ namespace HousingRentalApp.Api.Controllers
         /// </summary>
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePropertyRequest request)
+        public async Task<IActionResult> Create([FromForm] CreatePropertyRequest request, IFormFileCollection photos)
         {
             var userId = GetCurrentUserId();
 
@@ -78,9 +86,52 @@ namespace HousingRentalApp.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            if (photos.Count > 9)
+                return BadRequest(new { message = "Можно загрузить не более 9 фотографий" });
+
+            // Валидация типов файлов
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            foreach (var photo in photos)
+            {
+                var extension = Path.GetExtension(photo.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(extension))
+                    return BadRequest(new { message = $"Недопустимый формат файла: {photo.FileName}. Разрешены: jpg, jpeg, png, webp" });
+            }
+
             try
             {
                 var created = await _propertyService.CreatePropertyAsync(userId, request);
+
+                // сохранение фотографий
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+                for (int i = 0; i < photos.Count; i++)
+                {
+                    var photo = photos[i];
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await photo.CopyToAsync(stream);
+                    }
+
+                    var propertyPhoto = new PropertyPhoto
+                    {
+                        PropertyId = created.PropertyId,
+                        PhotoUrl = $"{baseUrl}/uploads/properties/{fileName}",
+                        IsMain = i == 0, // Первая фотография — главная
+                    };
+
+                    _context.PropertyPhotos.Add(propertyPhoto);
+                }
+
+                await _context.SaveChangesAsync();
+
                 return CreatedAtAction(nameof(GetById), new { id = created.PropertyId }, created);
             }
             catch (Exception ex)
