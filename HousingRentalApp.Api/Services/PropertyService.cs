@@ -56,7 +56,6 @@ namespace HousingRentalApp.Api.Services
                 PricePerNight = request.PricePerNight,
                 PropertyTypeId = request.PropertyTypeId,
                 IsActive = true,
-                //CreatedAt = DateTime.UtcNow
             };
 
             var created = await _propertyRepository.CreateAsync(property);
@@ -199,6 +198,7 @@ namespace HousingRentalApp.Api.Services
                 BedroomsCount = property.BedroomsCount,
                 Latitude = property.Latitude,
                 Longitude = property.Longitude,
+                IsActive = property.IsActive
             };
         }
     }

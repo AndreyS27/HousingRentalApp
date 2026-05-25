@@ -2,6 +2,7 @@ export interface PropertySummary {
   propertyId: number;
   title: string;
   city: string;
+  address: string;
   mainPhotoUrl: string;
   pricePerNight: number;
   averageRating: number | null;
@@ -10,6 +11,7 @@ export interface PropertySummary {
   bedsCount: number;
   latitude: number | null;
   longitude: number | null;
+  isActive: boolean;
 }
 
 export interface SearchParams {
