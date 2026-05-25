@@ -49,3 +49,8 @@ export interface PropertyDetails extends PropertySummary {
   reviewsCount: number;
   createdAt: string;
 }
+
+export interface PropertyType {
+  propertyTypeId: number;
+  typeName: string;
+}

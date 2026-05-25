@@ -11,4 +11,8 @@ export const propertiesApi = {
   update: (id: number, data: { title: string; pricePerNight: number; address: string }) =>
     api.put(`/properties/${id}`, data),
   delete: (id: number) => api.delete(`/properties/${id}`),
+  create: (formData: FormData) => 
+  api.post<PropertyDetails>('/properties', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
