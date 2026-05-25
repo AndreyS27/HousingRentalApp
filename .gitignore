@@ -506,3 +506,5 @@ $RECYCLE.BIN/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+HousingRentalApp.Api/wwwroot/
