@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage/LoginPage';
 import { RegisterPage } from './pages/RegisterPage/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage/ProfilePage';
 import { CreatePropertyPage } from './pages/CreatePropertyPage/CreatePropertyPage';
+import { EditPropertyPage } from './pages/EditPropertyPage/EditPropertyPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<ProfilePage/>} />
       <Route path="/create-property" element={<CreatePropertyPage/>} />
+      <Route path="/edit-property/:id" element={<EditPropertyPage />} />
     </Routes>
   );
 }

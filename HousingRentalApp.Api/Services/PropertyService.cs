@@ -1,6 +1,8 @@
-﻿using HousingRentalApp.Api.Data.Repositories;
+﻿using HousingRentalApp.Api.Data;
+using HousingRentalApp.Api.Data.Repositories;
 using HousingRentalApp.Api.DTOs;
 using HousingRentalApp.Api.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace HousingRentalApp.Api.Services
@@ -9,11 +11,13 @@ namespace HousingRentalApp.Api.Services
     {
         private readonly IPropertyRepository _propertyRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ApplicationDbContext _context;
 
-        public PropertyService(IPropertyRepository propertyRepository, IWebHostEnvironment webHostEnvironment)
+        public PropertyService(IPropertyRepository propertyRepository, IWebHostEnvironment webHostEnvironment, ApplicationDbContext context)
         {
             _propertyRepository = propertyRepository;
             _webHostEnvironment = webHostEnvironment;
+            _context = context;
         }
 
         public async Task<PropertyResponse?> GetPropertyByIdAsync(int propertyId)
@@ -95,7 +99,7 @@ namespace HousingRentalApp.Api.Services
             var property = await _propertyRepository.GetByIdAsync(propertyId);
             if (property == null) return null;
 
-            // Обновляем только те поля, которые переданы
+            // Обновляем основные поля
             if (!string.IsNullOrWhiteSpace(request.Title))
                 property.Title = request.Title;
 
@@ -107,6 +111,26 @@ namespace HousingRentalApp.Api.Services
 
             if (!string.IsNullOrWhiteSpace(request.City))
                 property.City = request.City;
+
+            // Обновляем координаты, если изменился адрес или город
+            if (!string.IsNullOrWhiteSpace(request.Address) || !string.IsNullOrWhiteSpace(request.City))
+            {
+                var fullAddress = $"{request.City ?? property.City}, {request.Address ?? property.Address}";
+                var coordinates = await GetCoordinatesFromAddressAsync(fullAddress);
+
+                if (coordinates != null)
+                {
+                    property.Latitude = coordinates.Value.Latitude;
+                    property.Longitude = coordinates.Value.Longitude;
+                }
+            }
+            else if (request.Latitude.HasValue && request.Longitude.HasValue)
+            {
+                // Если координаты переданы явно
+                property.Latitude = request.Latitude.Value;
+                property.Longitude = request.Longitude.Value;
+            }
+
 
             if (request.GuestsCount.HasValue)
                 property.GuestsCount = request.GuestsCount.Value;
@@ -129,13 +153,78 @@ namespace HousingRentalApp.Api.Services
             if (request.IsActive.HasValue)
                 property.IsActive = request.IsActive.Value;
 
-            await _propertyRepository.UpdateAsync(property);
+            // Обновляем удобства
+            if (request.AmenityIds != null)
+            {
+                // Удаляем старые связи
+                var oldAmenities = _context.PropertyAmenities.Where(pa => pa.PropertyId == propertyId);
+                _context.PropertyAmenities.RemoveRange(oldAmenities);
+
+                // Добавляем новые
+                foreach (var amenityId in request.AmenityIds)
+                {
+                    _context.PropertyAmenities.Add(new PropertyAmenity
+                    {
+                        PropertyId = propertyId,
+                        AmenityId = amenityId
+                    });
+                }
+            }
+
+            // Обновляем переопределения дат (PropertyAvailability)
+            if (request.DateOverrides != null)
+            {
+                // Удаляем старые переопределения для этого объекта
+                var oldOverrides = _context.PropertyAvailabilities.Where(pa => pa.PropertyId == propertyId);
+                _context.PropertyAvailabilities.RemoveRange(oldOverrides);
+
+                // Добавляем новые
+                foreach (var overrideDto in request.DateOverrides)
+                {
+                    _context.PropertyAvailabilities.Add(new PropertyAvailability
+                    {
+                        PropertyId = propertyId,
+                        Date = overrideDto.Date,
+                        IsAvailable = overrideDto.IsAvailable,
+                        PriceOverride = overrideDto.PriceOverride
+                    });
+                }
+            }
+
+            // Удаляем фотографии
+            if (request.PhotosToDeleteIds != null && request.PhotosToDeleteIds.Any())
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
+
+                foreach (var photoId in request.PhotosToDeleteIds)
+                {
+                    // Находим запись в БД
+                    var photo = await _context.PropertyPhotos
+                        .FirstOrDefaultAsync(p => p.PhotoId == photoId && p.PropertyId == propertyId);
+                    if (photo != null)
+                    {
+                        var uri = new Uri(photo.PhotoUrl);
+                        var fileName = Path.GetFileName(uri.LocalPath);
+                        var filePath = Path.Combine(uploadsFolder, fileName);
+
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                        }
+
+                        // Удаляем запись из БД
+                        _context.PropertyPhotos.Remove(photo);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
             return await GetPropertyByIdAsync(propertyId);
         }
 
         public async Task<bool> DeletePropertyAsync(int propertyId, int userId)
         {
-            if (!await _propertyRepository.IsOwnerAsync(propertyId, userId)) 
+            if (!await _propertyRepository.IsOwnerAsync(propertyId, userId))
                 return false;
 
             var property = await _propertyRepository.GetByIdAsync(propertyId);
@@ -185,6 +274,19 @@ namespace HousingRentalApp.Api.Services
                 ? property.Reviews.Average(r => r.Rating)
                 : null;
 
+            var amenityIds = property.PropertyAmenities?
+                .Select(pa => pa.AmenityId)
+                .ToList() ?? new List<int>();
+
+            var dateOverrides = property.PropertyAvailabilities?
+                .Select(pa => new DateOverrideDto
+                {
+                    Date = pa.Date,
+                    IsAvailable = pa.IsAvailable,
+                    PriceOverride = pa.PriceOverride
+                })
+                .ToList() ?? new List<DateOverrideDto>();
+
             return new PropertyResponse
             {
                 PropertyId = property.PropertyId,
@@ -204,18 +306,27 @@ namespace HousingRentalApp.Api.Services
                     ? $"{property.Owner.FirstName} {property.Owner.LastName}"
                     : "Неизвестный",
                 PropertyType = property.PropertyType?.TypeName ?? "Не указан",
+                PropertyTypeId = property.PropertyTypeId,
                 Amenities = property.PropertyAmenities?
                     .Select(pa => pa.Amenity?.AmenityName ?? string.Empty)
                     .Where(a => !string.IsNullOrEmpty(a))
                     .ToList() ?? new List<string>(),
+                AmenityIds = amenityIds,
                 Photos = property.PropertyPhotos?
                     .OrderByDescending(p => p.IsMain)
                     .ThenBy(p => p.UploadedAt)
-                    .Select(p => p.PhotoUrl)
-                    .ToList() ?? new List<string>(),
+                    .Select(p => new PropertyPhotoDto
+                    {
+                        PhotoId = p.PhotoId,
+                        PhotoUrl = p.PhotoUrl,
+                        IsMain = p.IsMain,
+                        UploadedAt = p.UploadedAt
+                    })
+                    .ToList() ?? new List<PropertyPhotoDto>(),
                 AverageRating = averageRating,
                 ReviewsCount = property.Reviews?.Count ?? 0,
-                CreatedAt = property.CreatedAt
+                CreatedAt = property.CreatedAt,
+                DateOverrides = dateOverrides
             };
         }
 

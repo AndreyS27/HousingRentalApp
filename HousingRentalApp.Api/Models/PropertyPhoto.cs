@@ -13,7 +13,7 @@ public partial class PropertyPhoto
 
     public bool IsMain { get; set; }
 
-    public DateTime? UploadedAt { get; set; }
+    public DateTime UploadedAt { get; set; }
 
     public virtual Property Property { get; set; } = null!;
 }

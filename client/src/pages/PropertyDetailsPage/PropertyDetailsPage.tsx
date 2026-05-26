@@ -84,7 +84,7 @@ export const PropertyDetailsPage: React.FC = () => {
           <Grid gutter={8}>
             <Grid.Col span={8}>
               <Image
-                src={property.photos?.[0] || 'https://placehold.co/800x500?text=No+Image'}
+                src={property.photos?.[0].photoUrl || 'https://placehold.co/800x500?text=No+Image'}
                 height={400}
                 radius="md"
                 style={{ objectFit: 'cover' }}
@@ -93,13 +93,13 @@ export const PropertyDetailsPage: React.FC = () => {
             <Grid.Col span={4}>
               <Stack gap={8}>
                 <Image
-                  src={property.photos?.[1] || 'https://placehold.co/400x200?text=No+Image'}
+                  src={property.photos?.[1].photoUrl || 'https://placehold.co/400x200?text=No+Image'}
                   height={195}
                   radius="md"
                   style={{ objectFit: 'cover' }}
                 />
                 <Image
-                  src={property.photos?.[2] || 'https://placehold.co/400x200?text=No+Image'}
+                  src={property.photos?.[2].photoUrl || 'https://placehold.co/400x200?text=No+Image'}
                   height={195}
                   radius="md"
                   style={{ objectFit: 'cover' }}

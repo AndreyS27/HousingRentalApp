@@ -8,11 +8,16 @@ export const propertiesApi = {
   getById: (id: number) =>
     api.get<PropertyDetails>(`/properties/${id}`),
   getMyProperties: () => api.get<PropertySummary[]>('/properties/my'),
-  update: (id: number, data: { title: string; pricePerNight: number; address: string }) =>
-    api.put(`/properties/${id}`, data),
+  update: (id: number, data: any) => api.put(`/properties/${id}`, data),
+  addPhotos: (id: number, formData: FormData) =>
+    api.post(`/properties/${id}/photos`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  setMainPhoto: (propertyId: number, photoId: number) =>
+    api.put(`/properties/${propertyId}/photos/${photoId}/main`),
   delete: (id: number) => api.delete(`/properties/${id}`),
-  create: (formData: FormData) => 
-  api.post<PropertyDetails>('/properties', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  create: (formData: FormData) =>
+    api.post<PropertyDetails>('/properties', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
 };

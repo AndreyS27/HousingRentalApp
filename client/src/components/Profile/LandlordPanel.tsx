@@ -145,7 +145,7 @@ export const LandlordPanel: React.FC = () => {
   };
 
   const handleRejectBooking = async (bookingId: number) => {
-    if (!confirm('Вы уверены, что хотите отклонить заявку?')) return;
+    if (!window.confirm('Вы уверены, что хотите отклонить заявку?')) return;
     try {
       await bookingsApi.rejectBooking(bookingId);
       await fetchLandlordData();
@@ -215,7 +215,7 @@ export const LandlordPanel: React.FC = () => {
                       </Table.Td>
                       <Table.Td>
                         <Group gap="xs">
-                          <Button size="xs" variant="outline" onClick={() => openEditModal(property)}>
+                          <Button size="xs" variant="outline" onClick={() => navigate(`/edit-property/${property.propertyId}`)}>
                             <IconEdit size={14} />
                           </Button>
                           <Button size="xs" color="red" variant="outline" onClick={() => {

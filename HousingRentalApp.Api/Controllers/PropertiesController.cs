@@ -188,6 +188,98 @@ namespace HousingRentalApp.Api.Controllers
         }
 
         /// <summary>
+        /// Добавление фотографий к существующему объекту
+        /// POST /api/properties/{id}/photos
+        /// </summary>
+        [Authorize]
+        [HttpPost("{id}/photos")]
+        public async Task<IActionResult> AddPhotos(int id, IFormFileCollection photos)
+        {
+            var userId = GetCurrentUserId();
+
+            var isOwner = await _propertyService.IsOwnerAsync(id, userId);
+            if (!isOwner)
+                return Forbid("Вы не являетесь владельцем этого объекта");
+
+            var property = await _propertyService.GetPropertyByIdAsync(id);
+            if (property == null)
+                return NotFound(new { message = "Объект не найден" });
+
+            var currentPhotoCount = _context.PropertyPhotos.Count(p => p.PropertyId == id);
+            var remainingSlots = 9 - currentPhotoCount;
+
+            if (photos.Count > remainingSlots)
+                return BadRequest(new { message = $"Можно добавить не более {remainingSlots} фотографий" });
+
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var newPhotos = new List<PropertyPhoto>();
+
+            for (int i = 0; i < photos.Count; i++)
+            {
+                var photo = photos[i];
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await photo.CopyToAsync(stream);
+                }
+
+                var isMain = currentPhotoCount == 0 && i == 0; // Если нет ни одной фотографии, первая становится главной
+
+                var propertyPhoto = new PropertyPhoto
+                {
+                    PropertyId = id,
+                    PhotoUrl = $"{baseUrl}/uploads/properties/{fileName}",
+                    IsMain = isMain,
+                };
+
+                newPhotos.Add(propertyPhoto);
+            }
+
+            _context.PropertyPhotos.AddRange(newPhotos);
+            await _context.SaveChangesAsync();
+
+            return Ok(newPhotos.Select(p => new { p.PhotoId, p.PhotoUrl, p.IsMain }));
+        }
+
+        /// <summary>
+        /// Установка главной фотографии
+        /// PUT /api/properties/{id}/photos/{photoId}/main
+        /// </summary>
+        [Authorize]
+        [HttpPut("{id}/photos/{photoId}/main")]
+        public async Task<IActionResult> SetMainPhoto(int id, int photoId)
+        {
+            var userId = GetCurrentUserId();
+
+            var isOwner = await _propertyService.IsOwnerAsync(id, userId);
+            if (!isOwner)
+                return Forbid("Вы не являетесь владельцем этого объекта");
+
+            // Сбрасываем флаг IsMain для всех фотографий объекта
+            var photos = await _context.PropertyPhotos.Where(p => p.PropertyId == id).ToListAsync();
+            foreach (var photo in photos)
+            {
+                photo.IsMain = false;
+            }
+
+            // Устанавливаем IsMain для выбранной фотографии
+            var mainPhoto = photos.FirstOrDefault(p => p.PhotoId == photoId);
+            if (mainPhoto == null)
+                return NotFound(new { message = "Фотография не найдена" });
+
+            mainPhoto.IsMain = true;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Главная фотография обновлена" });
+        }
+
+        /// <summary>
         /// Вспомогательный метод для получения ID текущего пользователя из JWT-токена
         /// </summary>
         private int GetCurrentUserId()

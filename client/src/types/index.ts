@@ -1,3 +1,10 @@
+export interface PropertyPhoto {
+  photoId: number;
+  photoUrl: string;
+  isMain: boolean;
+  uploadedAt: string;
+}
+
 export interface PropertySummary {
   propertyId: number;
   title: string;
@@ -44,13 +51,22 @@ export interface PropertyDetails extends PropertySummary {
   isActive: boolean;
   ownerName: string;
   propertyType: string;
+  propertyTypeId: number;
   amenities: string[];
-  photos: string[];
+  amenityIds: number[];
+  photos: PropertyPhoto[];
   reviewsCount: number;
   createdAt: string;
+  dateOverrides?: DateOverride[];
 }
 
 export interface PropertyType {
   propertyTypeId: number;
   typeName: string;
+}
+
+export interface DateOverride {
+  date: string;
+  isAvailable: boolean;
+  priceOverride: number | null;
 }
