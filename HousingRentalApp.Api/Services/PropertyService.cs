@@ -8,10 +8,12 @@ namespace HousingRentalApp.Api.Services
     public class PropertyService : IPropertyService
     {
         private readonly IPropertyRepository _propertyRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PropertyService(IPropertyRepository propertyRepository)
+        public PropertyService(IPropertyRepository propertyRepository, IWebHostEnvironment webHostEnvironment)
         {
             _propertyRepository = propertyRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<PropertyResponse?> GetPropertyByIdAsync(int propertyId)
@@ -135,6 +137,32 @@ namespace HousingRentalApp.Api.Services
         {
             if (!await _propertyRepository.IsOwnerAsync(propertyId, userId)) 
                 return false;
+
+            var property = await _propertyRepository.GetByIdAsync(propertyId);
+            if (property == null)
+                return false;
+
+            // Удаление физических файлов фотографий с сервера
+
+            if (property.PropertyPhotos != null && property.PropertyPhotos.Any())
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
+
+                foreach (var photo in property.PropertyPhotos)
+                {
+                    if (!string.IsNullOrEmpty(photo.PhotoUrl))
+                    {
+                        var uri = new Uri(photo.PhotoUrl);
+                        var fileName = Path.GetFileName(uri.LocalPath);
+                        var filePath = Path.Combine(uploadsFolder, fileName);
+
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                        }
+                    }
+                }
+            }
 
             return await _propertyRepository.DeleteAsync(propertyId);
         }
