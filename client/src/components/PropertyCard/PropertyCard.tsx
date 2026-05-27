@@ -7,19 +7,39 @@ interface PropertyCardProps {
   property: PropertySummary;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  searchParams?: {
+    city: string;
+    checkInDate?: string;
+    checkOutDate?: string;
+    guestCount?: number;
+  };
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
+  searchParams,
 }) => {
-
-  const propertyUrl = `${window.location.origin}/property/${property.propertyId}`;
-
   const handleOpenInNewTab = (e: React.MouseEvent) => {
     e.preventDefault();
-    window.open(propertyUrl, '_blank');
+    
+    // Строим URL с параметрами поиска
+    const urlParams = new URLSearchParams();
+    if (searchParams?.checkInDate) {
+      urlParams.set('checkIn', searchParams.checkInDate);
+    }
+    if (searchParams?.checkOutDate) {
+      urlParams.set('checkOut', searchParams.checkOutDate);
+    }
+    if (searchParams?.guestCount) {
+      urlParams.set('guests', searchParams.guestCount.toString());
+    }
+    
+    const queryString = urlParams.toString();
+    const url = `${window.location.origin}/property/${property.propertyId}${queryString ? `?${queryString}` : ''}`;
+    
+    window.open(url, '_blank');
   };
 
   return (

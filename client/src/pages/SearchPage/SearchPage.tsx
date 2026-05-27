@@ -188,6 +188,12 @@ export const SearchPage: React.FC = () => {
                           property={property}
                           onMouseEnter={() => setHoveredPropertyId(property.propertyId)}
                           onMouseLeave={() => setHoveredPropertyId(null)}
+                          searchParams={{
+                            city,
+                            checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
+                            checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
+                            guestCount: guestsCount || undefined,
+                          }}
                         />
                       </Grid.Col>
                     ))}
@@ -204,6 +210,12 @@ export const SearchPage: React.FC = () => {
               properties={properties}
               cityCoordinates={cityCoordinates}
               hoveredPropertyId={hoveredPropertyId}
+              searchParams={{
+                city,
+                checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
+                checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
+                guestCount: guestsCount || undefined,
+              }}
             />
             {/* </Paper> */}
           </Grid.Col>

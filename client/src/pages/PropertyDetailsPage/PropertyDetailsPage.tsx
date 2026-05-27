@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Grid,
@@ -17,12 +17,14 @@ import {
   Alert,
   Rating,
   Box,
+  NumberInput
 } from '@mantine/core';
 import { IconMapPin, IconUsers, IconBed, IconBath, IconCalendar, IconHeart, IconShare, IconArrowLeft } from '@tabler/icons-react';
 import { propertiesApi } from '../../api/propertiesApi';
 import { PropertyDetails } from '../../types';
 import { PropertyMap } from '../../components/Map/PropertyMap';
 import { Header } from '../../components/Layout/Header/Header';
+import { DatePickerInput } from '@mantine/dates';
 
 export const PropertyDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +32,29 @@ export const PropertyDetailsPage: React.FC = () => {
   const [property, setProperty] = useState<PropertyDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+
+  // Читаем searchParams из state (при переходе с SearchPage)
+  const state = location.state as { searchParams?: any };
+  const searchParamsFromState = state?.searchParams;
+
+  // Читаем параметры из URL (если открыта новая вкладка)
+  const urlParams = new URLSearchParams(location.search);
+  const checkInParam = urlParams.get('checkIn');
+  const checkOutParam = urlParams.get('checkOut');
+  const guestsParam = urlParams.get('guests');
+
+  const initialCheckIn = checkInParam || searchParamsFromState?.checkInDate || null;
+  const initialCheckOut = checkOutParam || searchParamsFromState?.checkOutDate || null;
+  const initialGuests = guestsParam
+    ? parseInt(guestsParam)
+    : searchParamsFromState?.guestsCount || 1;
+
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    initialCheckIn ? new Date(initialCheckIn) : null,
+    initialCheckOut ? new Date(initialCheckOut) : null,
+  ]);
+  const [guestsCount, setGuestsCount] = useState<number>(Math.min(initialGuests, property?.guestsCount || initialGuests));
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -121,14 +146,6 @@ export const PropertyDetailsPage: React.FC = () => {
                     <Text c="dimmed">{property.address}, {property.city}</Text>
                   </Group>
                 </Box>
-                <Group>
-                  <Button variant="outline" size="sm" leftSection={<IconHeart size={18} />}>
-                    В избранное
-                  </Button>
-                  <Button variant="outline" size="sm" leftSection={<IconShare size={18} />}>
-                    Поделиться
-                  </Button>
-                </Group>
               </Group>
 
               <Group gap="lg">
@@ -208,17 +225,25 @@ export const PropertyDetailsPage: React.FC = () => {
 
                 <Stack gap="xs">
                   <Text fw={500} size="sm">Даты поездки</Text>
-                  <Group grow>
-                    <Button variant="default" size="sm">Заезд</Button>
-                    <Button variant="default" size="sm">Выезд</Button>
-                  </Group>
+                  <DatePickerInput
+                    type="range"
+                    placeholder="Выберите даты"
+                    value={dateRange}
+                    onChange={setDateRange}
+                    minDate={new Date()}
+                    
+                  />
                 </Stack>
 
                 <Stack gap="xs">
                   <Text fw={500} size="sm">Гости</Text>
-                  <Button variant="default" size="sm" fullWidth>
-                    {property.guestsCount} гостя
-                  </Button>
+                  <NumberInput
+                    placeholder="Количество гостей"
+                    min={1}
+                    max={property.guestsCount}
+                    value={guestsCount}
+                    onChange={(value) => setGuestsCount(Number(value))}
+                  />
                 </Stack>
 
                 <Divider />
@@ -234,7 +259,7 @@ export const PropertyDetailsPage: React.FC = () => {
             </Paper>
 
             {cityCoordinates && (
-              <Paper shadow="sm" radius="md" mt="md" style={{ height: 300, overflow: 'hidden' }}>
+              <Paper shadow="sm" radius="md" mt="90" style={{ height: 300, overflow: 'hidden'}}>
                 <PropertyMap
                   properties={[property]}
                   hoveredPropertyId={null}

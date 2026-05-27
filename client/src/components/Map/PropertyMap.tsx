@@ -35,16 +35,28 @@ interface PropertyMapProps {
   properties: PropertySummary[];
   cityCoordinates: [number, number] | null;
   hoveredPropertyId: number | null;
+  searchParams?: {
+    city: string,
+    checkInDate?: string;
+    checkOutDate?: string;
+    guestCount?: number;
+  };
 }
 
 export const PropertyMap: React.FC<PropertyMapProps> = ({
   properties,
   cityCoordinates,
   hoveredPropertyId,
+  searchParams
 }) => {
 
   const handleOpenInNewTab = (propertyId: number) => {
-    const url = `${window.location.origin}/property/${propertyId}`;
+    const params = new URLSearchParams();
+    if (searchParams?.checkInDate) params.set('checkIn', searchParams.checkInDate);
+    if (searchParams?.checkOutDate) params.set('checkOut', searchParams.checkOutDate);
+    if (searchParams?.guestCount) params.set('guests', searchParams.guestCount.toString());
+
+    const url = `${window.location.origin}/property/${propertyId}${params.toString() ? `?${params.toString()}` : ''}`;
     window.open(url, '_blank');
   };
 
