@@ -5,7 +5,6 @@ import {
   Paper,
   TextInput,
   Button,
-  Group,
   Stack,
   Title,
   Box,
@@ -68,6 +67,7 @@ export const MainPage: React.FC = () => {
               value={dateRange}
               onChange={setDateRange}
               leftSection={<IconCalendar size={20} />}
+              minDate={new Date()}
             />
 
             <TextInput

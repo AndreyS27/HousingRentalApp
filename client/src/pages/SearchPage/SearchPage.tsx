@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Container,
   Grid,
-  Paper,
   TextInput,
   Button,
-  Group,
   Stack,
   Loader,
   Center,
@@ -13,7 +10,7 @@ import {
   Text,
   ScrollArea,
 } from '@mantine/core';
-import { IconSearch, IconFilter, IconCalendar, IconUsers, IconArrowLeft } from '@tabler/icons-react';
+import { IconSearch, IconFilter, IconCalendar, IconUsers } from '@tabler/icons-react';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
 import { PropertyCard } from '../../components/PropertyCard/PropertyCard';
 import { PropertyMap } from '../../components/Map/PropertyMap';
@@ -130,6 +127,7 @@ export const SearchPage: React.FC = () => {
               value={dateRange}
               onChange={setDateRange}
               leftSection={<IconCalendar size={16} />}
+              minDate={new Date()}
             />
           </Grid.Col>
 
