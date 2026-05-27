@@ -69,7 +69,8 @@ export const LandlordPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  
+  const [activeBookings, setActiveBookings] = useState<BookingRequest[]>([]);
+
   useEffect(() => {
     fetchLandlordData();
   }, []);
@@ -79,16 +80,18 @@ export const LandlordPanel: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [propsRes, requestsRes, pastRes, reviewsRes] = await Promise.all([
+      const [propsRes, requestsRes, pastRes, reviewsRes, activeRes] = await Promise.all([
         propertiesApi.getMyProperties(),
         bookingsApi.getBookingRequestsForOwner(),
         bookingsApi.getPastBookingsForOwner(),
         bookingsApi.getReviewsForOwner(),
+        bookingsApi.getActiveBookingsForOwner(),
       ]);
       setProperties(propsRes.data);
       setBookingRequests(requestsRes.data);
       setPastBookings(pastRes.data);
       setReviews(reviewsRes.data);
+      setActiveBookings(activeRes.data);
     } catch (err) {
       console.error('Ошибка загрузки данных арендодателя:', err);
       setError('Не удалось загрузить данные');
@@ -208,7 +211,7 @@ export const LandlordPanel: React.FC = () => {
                 </Table.Tbody>
               </Table>
             )}
-            
+
           </Accordion.Panel>
         </Accordion.Item>
 
@@ -259,6 +262,54 @@ export const LandlordPanel: React.FC = () => {
                             <IconX size={14} />
                           </Button>
                         </Group>
+                      </Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            )}
+          </Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value="activeBookings">
+          <Accordion.Control>
+            <Group>
+              <IconCalendar size={20} />
+              <Text fw={500}>Активные бронирования ({activeBookings.length})</Text>
+            </Group>
+          </Accordion.Control>
+          <Accordion.Panel>
+            {activeBookings.length === 0 ? (
+              <Text c="dimmed" ta="center" py="md">Нет активных бронирований</Text>
+            ) : (
+              <Table striped withTableBorder>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Название объекта</Table.Th>
+                    <Table.Th>Email гостя</Table.Th>
+                    <Table.Th>Даты бронирования</Table.Th>
+                    <Table.Th>Общая стоимость</Table.Th>
+                    <Table.Th>Статус</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {activeBookings.map((booking) => (
+                    <Table.Tr key={booking.bookingId}>
+                      <Table.Td>
+                        <Text
+                          style={{ cursor: 'pointer', color: '#339af0' }}
+                          onClick={() => navigate(`/property/${booking.propertyId}`)}
+                        >
+                          {booking.propertyTitle}
+                        </Text>
+                      </Table.Td>
+                      <Table.Td>{booking.renterEmail}</Table.Td>
+                      <Table.Td>
+                        {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
+                      </Table.Td>
+                      <Table.Td>{booking.totalPrice.toLocaleString()} ₽</Table.Td>
+                      <Table.Td>
+                        <Badge color="green">Подтверждено</Badge>
                       </Table.Td>
                     </Table.Tr>
                   ))}

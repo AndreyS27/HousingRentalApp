@@ -271,6 +271,14 @@ namespace HousingRentalApp.Api.Services
             return reviews;
         }
 
+
+        // Получить активные (подтверждённые) бронирования для арендодателя
+        public async Task<List<BookingResponse>> GetActiveBookingsForOwnerAsync(int ownerId)
+        {
+            var bookings = await _bookingRepository.GetActiveBookingsForOwnerAsync(ownerId);
+            return bookings.Select(b => MapToResponse(b)).ToList();
+        }
+
         // Приватный метод для преобразования Booking -> BookingResponse
         private BookingResponse MapToResponse(Booking booking)
         {

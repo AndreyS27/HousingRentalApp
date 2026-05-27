@@ -250,6 +250,18 @@ namespace HousingRentalApp.Api.Controllers
             return Ok(reviews);
         }
 
+        /// <summary>
+        /// Получить активные (подтверждённые) бронирования для арендодателя
+        /// GET /api/bookings/owner/active
+        /// </summary>
+        [HttpGet("owner/active")]
+        public async Task<IActionResult> GetActiveBookingsForOwner()
+        {
+            var userId = GetCurrentUserId();
+            var bookings = await _bookingService.GetActiveBookingsForOwnerAsync(userId);
+            return Ok(bookings);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

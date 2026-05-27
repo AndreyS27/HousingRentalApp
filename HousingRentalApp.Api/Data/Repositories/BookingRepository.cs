@@ -252,5 +252,19 @@ namespace HousingRentalApp.Api.Data.Repositories
                 .OrderByDescending(b => b.CheckOutDate)
                 .ToListAsync();
         }
+
+        public async Task<List<Booking>> GetActiveBookingsForOwnerAsync(int ownerId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.PropertyPhotos)
+                .Include(b => b.Renter)
+                .Include(b => b.Status)
+                .Where(b => b.Property != null &&
+                            b.Property.OwnerId == ownerId &&
+                            b.StatusId == 2) // Статус "Подтверждено"
+                .OrderByDescending(b => b.CheckInDate)
+                .ToListAsync();
+        }
     }
 }

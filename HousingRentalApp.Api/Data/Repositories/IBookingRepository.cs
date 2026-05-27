@@ -34,5 +34,7 @@ namespace HousingRentalApp.Api.Data.Repositories
         Task<List<Booking>> GetPastBookingsForOwnerAsync(int ownerId);
         Task<List<Booking>> GetBookingRequestsForOwnerAsync(int ownerId);
         Task<List<Booking>> GetCompletedBookingsForOwnerAsync(int ownerId);
+
+        Task<List<Booking>> GetActiveBookingsForOwnerAsync(int ownerId);
     }
 }

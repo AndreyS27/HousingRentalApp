@@ -15,4 +15,5 @@ export const bookingsApi = {
   cancelBooking: (id: number) => api.delete(`/bookings/${id}`),
   confirmBooking: (id: number) => api.post(`/bookings/${id}/confirm`),
   rejectBooking: (id: number) => api.post(`/bookings/${id}/reject`),
+  getActiveBookingsForOwner: () => api.get('/bookings/owner/active'),
 };
