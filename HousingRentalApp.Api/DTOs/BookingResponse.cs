@@ -8,6 +8,7 @@
         public string PropertyAddress { get; set; } = string.Empty;
         public string PropertyMainPhoto { get; set; } = string.Empty;
         public string RenterName { get; set; } = string.Empty;
+        public string RenterEmail { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateOnly CheckInDate { get; set; }
         public DateOnly CheckOutDate { get; set; }

@@ -194,7 +194,6 @@ namespace HousingRentalApp.Api.Services
             if (payment != null && payment.PaymentStatusId == 2)
             {
                 payment.PaymentStatusId = 5;
-                payment.UpdatedAt = DateTime.UtcNow;
                 await _paymentRepository.UpdateAsync(payment);
             }
 
@@ -281,9 +280,9 @@ namespace HousingRentalApp.Api.Services
             if (payment != null)
             {
                 paymentStatus = payment.PaymentStatus?.StatusName ??
-                    (payment.PaymentStatusId == 2 ? "paid" :
-                     payment.PaymentStatusId == 1 ? "pending" :
-                     payment.PaymentStatusId == 3 ? "failed" : "refunded");
+                    (payment.PaymentStatusId == 2 ? "Оплачено" :
+                     payment.PaymentStatusId == 1 ? "Ожидает оплаты" :
+                     payment.PaymentStatusId == 3 ? "Ошибка оплаты" : "Средства возвращены");
             }
 
             // Находим главное фото объекта
@@ -302,6 +301,8 @@ namespace HousingRentalApp.Api.Services
                 RenterName = booking.Renter != null
                     ? $"{booking.Renter.FirstName} {booking.Renter.LastName}"
                     : "Неизвестный",
+                RenterEmail = booking.Renter != null
+                    ? $"{booking.Renter.Email}" : "Неизвестен",
                 Status = booking.Status?.StatusName ?? "Неизвестен",
                 CheckInDate = booking.CheckInDate,
                 CheckOutDate = booking.CheckOutDate,

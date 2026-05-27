@@ -13,9 +13,6 @@ import {
   Loader,
   Alert,
   Modal,
-  TextInput,
-  NumberInput,
-  Select,
 } from '@mantine/core';
 import { IconHome, IconCalendar, IconCurrencyRubel, IconMessageCircle, IconEdit, IconTrash, IconCheck, IconX } from '@tabler/icons-react';
 import { RootState } from '../../store';
@@ -46,8 +43,10 @@ interface PastBooking {
   bookingId: number;
   propertyId: number;
   propertyTitle: string;
-  bookingDate: string;
+  checkInDate: string;
+  checkOutDate: string;
   totalPrice: number;
+  status: string;
 }
 
 interface PropertyReview {
@@ -70,10 +69,7 @@ export const LandlordPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-  const [editModalOpened, setEditModalOpened] = useState(false);
-  const [editForm, setEditForm] = useState({ title: '', pricePerNight: 0, address: '' });
-
+  
   useEffect(() => {
     fetchLandlordData();
   }, []);
@@ -110,28 +106,6 @@ export const LandlordPanel: React.FC = () => {
       setSelectedProperty(null);
     } catch (err) {
       console.error('Ошибка удаления:', err);
-    }
-  };
-
-  const openEditModal = (property: Property) => {
-    setEditingProperty(property);
-    setEditForm({
-      title: property.title,
-      pricePerNight: property.pricePerNight,
-      address: property.address,
-    });
-    setEditModalOpened(true);
-  };
-
-  const handleEditProperty = async () => {
-    if (!editingProperty) return;
-    try {
-      await propertiesApi.update(editingProperty.propertyId, editForm);
-      await fetchLandlordData();
-      setEditModalOpened(false);
-      setEditingProperty(null);
-    } catch (err) {
-      console.error('Ошибка обновления:', err);
     }
   };
 
@@ -182,6 +156,9 @@ export const LandlordPanel: React.FC = () => {
             </Group>
           </Accordion.Control>
           <Accordion.Panel>
+            <Button fullWidth mt="md" onClick={() => navigate('/create-property')}>
+              + Добавить объект
+            </Button>
             {properties.length === 0 ? (
               <Text c="dimmed" ta="center" py="md">Список пуст</Text>
             ) : (
@@ -231,9 +208,7 @@ export const LandlordPanel: React.FC = () => {
                 </Table.Tbody>
               </Table>
             )}
-            <Button fullWidth mt="md" onClick={() => navigate('/create-property')}>
-              + Добавить объект
-            </Button>
+            
           </Accordion.Panel>
         </Accordion.Item>
 
@@ -309,9 +284,9 @@ export const LandlordPanel: React.FC = () => {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>Название объекта</Table.Th>
-                    <Table.Th>Дата бронирования</Table.Th>
+                    <Table.Th>Даты бронирования</Table.Th>
                     <Table.Th>Общая стоимость</Table.Th>
-                    <Table.Th>Действия</Table.Th>
+                    <Table.Th>Статус</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -325,13 +300,9 @@ export const LandlordPanel: React.FC = () => {
                           {booking.propertyTitle}
                         </Text>
                       </Table.Td>
-                      <Table.Td>{new Date(booking.bookingDate).toLocaleDateString()}</Table.Td>
+                      <Table.Td>{new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}</Table.Td>
                       <Table.Td>{booking.totalPrice.toLocaleString()} ₽</Table.Td>
-                      <Table.Td>
-                        <Button size="xs" variant="outline" onClick={() => navigate(`/booking/${booking.bookingId}`)}>
-                          Подробнее
-                        </Button>
-                      </Table.Td>
+                      <Table.Td>{booking.status}</Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
@@ -405,37 +376,6 @@ export const LandlordPanel: React.FC = () => {
           <Group justify="space-between">
             <Button variant="default" onClick={() => setDeleteModalOpened(false)}>Отмена</Button>
             <Button color="red" onClick={handleDeleteProperty}>Удалить</Button>
-          </Group>
-        </Stack>
-      </Modal>
-
-      {/* Модальное окно редактирования объекта */}
-      <Modal
-        opened={editModalOpened}
-        onClose={() => setEditModalOpened(false)}
-        title="Редактирование объекта"
-        size="md"
-      >
-        <Stack gap="md">
-          <TextInput
-            label="Название"
-            value={editForm.title}
-            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-          />
-          <TextInput
-            label="Адрес"
-            value={editForm.address}
-            onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-          />
-          <NumberInput
-            label="Цена за ночь"
-            value={editForm.pricePerNight}
-            onChange={(value) => setEditForm({ ...editForm, pricePerNight: Number(value) })}
-            min={1}
-          />
-          <Group justify="space-between">
-            <Button variant="default" onClick={() => setEditModalOpened(false)}>Отмена</Button>
-            <Button onClick={handleEditProperty}>Сохранить</Button>
           </Group>
         </Stack>
       </Modal>
