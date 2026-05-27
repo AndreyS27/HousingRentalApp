@@ -231,7 +231,7 @@ export const PropertyDetailsPage: React.FC = () => {
                     value={dateRange}
                     onChange={setDateRange}
                     minDate={new Date()}
-                    
+                    popoverProps={{ zIndex: 1000 }}
                   />
                 </Stack>
 
@@ -259,7 +259,7 @@ export const PropertyDetailsPage: React.FC = () => {
             </Paper>
 
             {cityCoordinates && (
-              <Paper shadow="sm" radius="md" mt="90" style={{ height: 300, overflow: 'hidden'}}>
+              <Paper shadow="sm" radius="md" mt="md" style={{ height: 300, overflow: 'hidden'}}>
                 <PropertyMap
                   properties={[property]}
                   hoveredPropertyId={null}

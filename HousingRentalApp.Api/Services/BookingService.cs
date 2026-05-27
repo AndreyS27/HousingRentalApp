@@ -14,11 +14,11 @@ namespace HousingRentalApp.Api.Services
         // 5	"Завершено"
 
         // Статусы платежей
-        //1	"pending"
-        //2	"paid"
-        //3	"failed"
-        //4	"cancelled"
-        //5	"refunded"
+        //1 "Ожидает оплаты"
+        //2 "Оплачено"
+        //3 "Ошибка оплаты"
+        //4 "Отменено"
+        //5 "Средства возвращены"
 
         private readonly IBookingRepository _bookingRepository;
         private readonly IPropertyRepository _propertyRepository;

@@ -128,6 +128,7 @@ export const SearchPage: React.FC = () => {
               onChange={setDateRange}
               leftSection={<IconCalendar size={16} />}
               minDate={new Date()}
+              popoverProps={{ zIndex: 1000 }}
             />
           </Grid.Col>
 
