@@ -25,6 +25,8 @@ import { PropertyDetails } from '../../types';
 import { PropertyMap } from '../../components/Map/PropertyMap';
 import { Header } from '../../components/Layout/Header/Header';
 import { DatePickerInput } from '@mantine/dates';
+import { notifications } from '@mantine/notifications';
+import dayjs from 'dayjs';
 
 export const PropertyDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,6 +57,25 @@ export const PropertyDetailsPage: React.FC = () => {
     initialCheckOut ? new Date(initialCheckOut) : null,
   ]);
   const [guestsCount, setGuestsCount] = useState<number>(Math.min(initialGuests, property?.guestsCount || initialGuests));
+
+  const handleBookNow = () => {
+  if (!initialCheckIn || !initialCheckOut) {
+    notifications.show({
+      title: 'Ошибка',
+      message: 'Выберите даты бронирования',
+      color: 'red',
+    });
+    return;
+  }
+  
+  const params = new URLSearchParams();
+  params.set('propertyId', id!);
+  params.set('checkIn', dayjs(dateRange[0]).format('YYYY-MM-DD'));
+  params.set('checkOut', dayjs(dateRange[1]).format('YYYY-MM-DD'));
+  params.set('guests', guestsCount.toString());
+  
+  navigate(`/booking?${params.toString()}`);
+};
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -248,7 +269,7 @@ export const PropertyDetailsPage: React.FC = () => {
 
                 <Divider />
 
-                <Button size="lg" fullWidth color="blue">
+                <Button size="lg" fullWidth color="blue" onClick={handleBookNow}>
                   Забронировать
                 </Button>
 

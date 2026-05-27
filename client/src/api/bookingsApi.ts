@@ -1,6 +1,12 @@
 import api from './client';
 
 export const bookingsApi = {
+  create: (data: { propertyId: number; checkInDate: string; checkOutDate: string; guestsCount: number }) =>
+    api.post('/bookings', data),
+  
+  pay: (bookingId: number, data: { paymentMethod: string }) =>
+    api.post(`/bookings/${bookingId}/pay`, data),
+  
   getMyBookings: () => api.get('/bookings/my'),
   getMyPastBookings: () => api.get('/bookings/my/past'),
   getBookingRequestsForOwner: () => api.get('/bookings/owner/'),

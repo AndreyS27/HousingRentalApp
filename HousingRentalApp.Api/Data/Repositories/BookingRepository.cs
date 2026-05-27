@@ -144,7 +144,6 @@ namespace HousingRentalApp.Api.Data.Repositories
             if (booking == null) return false;
 
             booking.StatusId = statusId;
-            booking.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }

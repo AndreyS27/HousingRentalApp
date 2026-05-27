@@ -8,6 +8,8 @@ import { RegisterPage } from './pages/RegisterPage/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage/ProfilePage';
 import { CreatePropertyPage } from './pages/CreatePropertyPage/CreatePropertyPage';
 import { EditPropertyPage } from './pages/EditPropertyPage/EditPropertyPage';
+import { BookingPage } from './pages/BookingPage/BookingPage';
+import { BookingSuccessPage } from './pages/BookingSuccessPage/BookingSuccessPage';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
       <Route path="/profile" element={<ProfilePage/>} />
       <Route path="/create-property" element={<CreatePropertyPage/>} />
       <Route path="/edit-property/:id" element={<EditPropertyPage />} />
+      <Route path="/booking" element={<BookingPage/>} />
+      <Route path="/booking-success" element={<BookingSuccessPage/>} />
     </Routes>
   );
 }

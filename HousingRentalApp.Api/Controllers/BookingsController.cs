@@ -13,10 +13,12 @@ namespace HousingRentalApp.Api.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _bookingService;
+        private readonly IPaymentService _paymentService;
 
-        public BookingsController(IBookingService bookingService)
+        public BookingsController(IBookingService bookingService, IPaymentService paymentService)
         {
             _bookingService = bookingService;
+            _paymentService = paymentService;
         }
 
         /// <summary>
@@ -93,14 +95,28 @@ namespace HousingRentalApp.Api.Controllers
         }
 
         /// <summary>
-        /// Оплатить бронирование (имитация платежа)
+        /// Оплата бронирования
         /// POST /api/bookings/{id}/pay
         /// </summary>
-        //[HttpPost("{id}/pay")]
-        //public async Task<IActionResult> PayForBooking()
-        //{
+        [HttpPost("{id}/pay")]
+        public async Task<IActionResult> PayForBooking(int id, [FromBody] PayRequest request)
+        {
+            var userId = GetCurrentUserId();
 
-        //}
+            var result = await _paymentService.ProcessPaymentAsync(id, request.PaymentMethod ?? "card");
+
+            if (result.Success)
+            {
+                return Ok(new
+                {
+                    success = true,
+                    message = "Оплата прошла успешно",
+                    transactionId = result.TransactionId,
+                });
+            }
+
+            return BadRequest(new { success = false, message = result.ErrorMessage });
+        }
 
         /// <summary>
         /// Отменить бронирование (до подтверждения арендодателем)
@@ -241,6 +257,11 @@ namespace HousingRentalApp.Api.Controllers
                 throw new UnauthorizedAccessException("Не удалось определить пользователя");
 
             return int.Parse(userIdClaim);
+        }
+
+        public class PayRequest
+        {
+            public string? PaymentMethod { get; set; }
         }
     }
 }
