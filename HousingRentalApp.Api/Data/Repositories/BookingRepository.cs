@@ -205,8 +205,8 @@ namespace HousingRentalApp.Api.Data.Repositories
                     .ThenInclude(p => p!.Owner)
                 .Include(b => b.Status)
                 .Where(b => b.RenterId == renterId &&
-                            (b.StatusId == 5 || b.StatusId == 3 || b.StatusId == 4) && // завершено, отменено, отклонено
-                            b.CheckOutDate < DateOnly.FromDateTime(DateTime.UtcNow))
+                            (b.StatusId == 5 || b.StatusId == 3 || b.StatusId == 4))  // завершено, отменено, отклонено
+                            //b.CheckOutDate < DateOnly.FromDateTime(DateTime.UtcNow))
                 .OrderByDescending(b => b.CheckOutDate)
                 .ToListAsync();
         }
@@ -264,6 +264,40 @@ namespace HousingRentalApp.Api.Data.Repositories
                             b.Property.OwnerId == ownerId &&
                             b.StatusId == 2) // Статус "Подтверждено"
                 .OrderByDescending(b => b.CheckInDate)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Получить активные бронирования для арендатора (ожидают подтверждения, подтверждены)
+        /// </summary>
+        public async Task<List<Booking>> GetActiveBookingsForRenterAsync(int renterId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.PropertyPhotos)
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.Owner)
+                .Include(b => b.Status)
+                .Where(b => b.RenterId == renterId &&
+                            (b.StatusId == 1 || b.StatusId == 2)) // 1 - ожидает, 2 - подтверждено
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Получить историю бронирований для арендатора (завершено, отменено, отклонено)
+        /// </summary>
+        public async Task<List<Booking>> GetHistoryBookingsForRenterAsync(int renterId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.PropertyPhotos)
+                .Include(b => b.Property)
+                    .ThenInclude(p => p!.Owner)
+                .Include(b => b.Status)
+                .Where(b => b.RenterId == renterId &&
+                            (b.StatusId == 3 || b.StatusId == 4 || b.StatusId == 5)) // 3 - отменено, 4 - отклонено, 5 - завершено
+                .OrderByDescending(b => b.CheckOutDate)
                 .ToListAsync();
         }
     }

@@ -262,6 +262,30 @@ namespace HousingRentalApp.Api.Controllers
             return Ok(bookings);
         }
 
+        /// <summary>
+        /// Получить активные бронирования текущего пользователя (арендатор)
+        /// GET /api/bookings/my/active
+        /// </summary>
+        [HttpGet("my/active")]
+        public async Task<IActionResult> GetMyActiveBookings()
+        {
+            var userId = GetCurrentUserId();
+            var bookings = await _bookingService.GetMyActiveBookingsAsync(userId);
+            return Ok(bookings);
+        }
+
+        /// <summary>
+        /// Получить историю бронирований текущего пользователя (арендатор)
+        /// GET /api/bookings/my/history
+        /// </summary>
+        [HttpGet("my/history")]
+        public async Task<IActionResult> GetMyHistoryBookings()
+        {
+            var userId = GetCurrentUserId();
+            var bookings = await _bookingService.GetMyHistoryBookingsAsync(userId);
+            return Ok(bookings);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -16,7 +16,7 @@ import {
   Textarea,
   Rating,
 } from '@mantine/core';
-import { IconCalendar, IconCurrencyRubel, IconMessageCircle, IconEdit } from '@tabler/icons-react';
+import { IconCalendar, IconMessageCircle, IconEdit } from '@tabler/icons-react';
 import { RootState } from '../../store';
 import { bookingsApi } from '../../api/bookingsApi';
 import { reviewsApi } from '../../api/reviewsApi';
@@ -44,7 +44,7 @@ export const RenterPanel: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
   const [activeBookings, setActiveBookings] = useState<Booking[]>([]);
-  const [pastBookings, setPastBookings] = useState<Booking[]>([]);
+  const [historyBookings, setHistoryBookings] = useState<Booking[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,13 +63,13 @@ export const RenterPanel: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [activeRes, pastRes, reviewsRes] = await Promise.all([
-        bookingsApi.getMyBookings(),
-        bookingsApi.getMyPastBookings(),
+      const [activeRes, historyRes, reviewsRes] = await Promise.all([
+        bookingsApi.getMyActiveBookings(),
+        bookingsApi.getMyHistoryBookings(),
         reviewsApi.getMyReviews(),
       ]);
       setActiveBookings(activeRes.data);
-      setPastBookings(pastRes.data);
+      setHistoryBookings(historyRes.data);
       setReviews(reviewsRes.data);
     } catch (err) {
       console.error('Ошибка загрузки данных арендатора:', err);
@@ -83,7 +83,7 @@ export const RenterPanel: React.FC = () => {
     if (!window.confirm('Вы уверены, что хотите отменить бронирование?')) return;
     try {
       await bookingsApi.cancelBooking(bookingId);
-      await fetchRenterData(); // Обновляем данные
+      await fetchRenterData();
     } catch (err) {
       console.error('Ошибка отмены бронирования:', err);
     }
@@ -122,6 +122,10 @@ export const RenterPanel: React.FC = () => {
         return <Badge color="yellow">Ожидает подтверждения</Badge>;
       case 'cancelled':
         return <Badge color="red">Отменено</Badge>;
+      case 'rejected':
+        return <Badge color="orange">Отклонено</Badge>;
+      case 'completed':
+        return <Badge color="gray">Завершено</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -185,7 +189,7 @@ export const RenterPanel: React.FC = () => {
                       <Table.Td>{booking.totalPrice.toLocaleString()} ₽</Table.Td>
                       <Table.Td>{getStatusBadge(booking.status)}</Table.Td>
                       <Table.Td>
-                        {booking.status === 'Ожидает подтверждения' && (
+                        {booking.status === 'awaiting_confirmation' && (
                           <Button
                             size="xs"
                             color="red"
@@ -204,15 +208,15 @@ export const RenterPanel: React.FC = () => {
         </Accordion.Item>
 
         {/* История бронирований */}
-        <Accordion.Item value="pastBookings">
+        <Accordion.Item value="historyBookings">
           <Accordion.Control>
             <Group>
               <IconCalendar size={20} />
-              <Text fw={500}>История бронирований ({pastBookings.length})</Text>
+              <Text fw={500}>История бронирований ({historyBookings.length})</Text>
             </Group>
           </Accordion.Control>
           <Accordion.Panel>
-            {pastBookings.length === 0 ? (
+            {historyBookings.length === 0 ? (
               <Text c="dimmed" ta="center" py="md">Список пуст</Text>
             ) : (
               <Table striped withTableBorder>
@@ -221,11 +225,12 @@ export const RenterPanel: React.FC = () => {
                     <Table.Th>Название объекта</Table.Th>
                     <Table.Th>Даты бронирования</Table.Th>
                     <Table.Th>Общая сумма</Table.Th>
+                    <Table.Th>Статус</Table.Th>
                     <Table.Th>Действия</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {pastBookings.map((booking) => (
+                  {historyBookings.map((booking) => (
                     <Table.Tr key={booking.bookingId}>
                       <Table.Td>
                         <Text
@@ -239,14 +244,17 @@ export const RenterPanel: React.FC = () => {
                         {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
                       </Table.Td>
                       <Table.Td>{booking.totalPrice.toLocaleString()} ₽</Table.Td>
+                      <Table.Td>{getStatusBadge(booking.status)}</Table.Td>
                       <Table.Td>
-                        <Button
-                          size="xs"
-                          variant="outline"
-                          onClick={() => openReviewModal(booking)}
-                        >
-                          Оставить отзыв
-                        </Button>
+                        {booking.status === 'completed' && (
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={() => openReviewModal(booking)}
+                          >
+                            Оставить отзыв
+                          </Button>
+                        )}
                       </Table.Td>
                     </Table.Tr>
                   ))}
