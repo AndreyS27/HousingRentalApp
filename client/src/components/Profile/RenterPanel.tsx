@@ -246,7 +246,7 @@ export const RenterPanel: React.FC = () => {
                       <Table.Td>{booking.totalPrice.toLocaleString()} ₽</Table.Td>
                       <Table.Td>{getStatusBadge(booking.status)}</Table.Td>
                       <Table.Td>
-                        {booking.status === 'completed' && (
+                        {booking.status === 'Завершено' && (
                           <Button
                             size="xs"
                             variant="outline"

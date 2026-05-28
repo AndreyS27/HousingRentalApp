@@ -37,7 +37,7 @@ namespace HousingRentalApp.Api.Services
 
             // Проверяем, что отзыв ешё не оставлен
             var reviewExists = await _reviewRepository.ReviewExistsForBookingAsync(request.BookingId);
-            if (!reviewExists)
+            if (reviewExists)
                 throw new Exception("Отзыв на это бронирование уже оставлен");
 
             // Проверяем, что объект существует
@@ -113,11 +113,13 @@ namespace HousingRentalApp.Api.Services
                 ReviewId = review.ReviewId,
                 BookingId = review.BookingId,
                 PropertyId = review.PropertyId,
+                PropertyTitle = review.Booking?.Property?.Title ?? "Не указано",
                 Rating = review.Rating,
                 Comment = review.Comment,
                 ReviewerName = review.Reviewer != null
                     ? $"{review.Reviewer.FirstName} {review.Reviewer.LastName}"
-                    : "Неизвестный"
+                    : "Неизвестный",
+                CreatedAt = review.CreatedAt
             };
         }
     }
