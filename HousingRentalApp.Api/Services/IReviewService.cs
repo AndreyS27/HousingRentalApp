@@ -10,5 +10,6 @@ namespace HousingRentalApp.Api.Services
         Task<List<ReviewResponse>> GetMyReviewsAsync(int userId);
         Task<List<ReviewResponse>> GetReviewsForOwnerAsync(int ownerId);
         Task<bool> CanReviewAsync(int userId, int bookingId);
+        Task<List<ReviewResponse>> GetReviewsByPropertyIdAsync(int propertyId);
     }
 }

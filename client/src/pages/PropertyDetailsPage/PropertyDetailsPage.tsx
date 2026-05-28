@@ -17,24 +17,31 @@ import {
   Alert,
   Rating,
   Box,
-  NumberInput
+  Avatar,
+  Card,
 } from '@mantine/core';
-import { IconMapPin, IconUsers, IconBed, IconBath, IconCalendar, IconHeart, IconShare, IconArrowLeft } from '@tabler/icons-react';
-import { propertiesApi } from '../../api/propertiesApi';
-import { PropertyDetails } from '../../types';
-import { PropertyMap } from '../../components/Map/PropertyMap';
-import { Header } from '../../components/Layout/Header/Header';
+import { IconMapPin, IconUsers, IconBed, IconBath, IconCalendar, IconHeart, IconShare, IconStar } from '@tabler/icons-react';
 import { DatePickerInput } from '@mantine/dates';
+import { NumberInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { Header } from '../../components/Layout/Header/Header';
+import { PropertyMap } from '../../components/Map/PropertyMap';
+import { propertiesApi } from '../../api/propertiesApi';
+import { reviewsApi } from '../../api/reviewsApi';
+import { PropertyDetails, Review } from '../../types';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+
+dayjs.locale('ru');
 
 export const PropertyDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [property, setProperty] = useState<PropertyDetails | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const location = useLocation();
 
   // Читаем searchParams из state (при переходе с SearchPage)
   const state = location.state as { searchParams?: any };
@@ -56,61 +63,80 @@ export const PropertyDetailsPage: React.FC = () => {
     initialCheckIn ? new Date(initialCheckIn) : null,
     initialCheckOut ? new Date(initialCheckOut) : null,
   ]);
-  const [guestsCount, setGuestsCount] = useState<number>(Math.min(initialGuests, property?.guestsCount || initialGuests));
-
-  const handleBookNow = () => {
-  if (!initialCheckIn || !initialCheckOut) {
-    notifications.show({
-      title: 'Ошибка',
-      message: 'Выберите даты бронирования',
-      color: 'red',
-    });
-    return;
-  }
-  
-  const params = new URLSearchParams();
-  params.set('propertyId', id!);
-  params.set('checkIn', dayjs(dateRange[0]).format('YYYY-MM-DD'));
-  params.set('checkOut', dayjs(dateRange[1]).format('YYYY-MM-DD'));
-  params.set('guests', guestsCount.toString());
-  
-  navigate(`/booking?${params.toString()}`);
-};
+  const [guestsCount, setGuestsCount] = useState<number>(initialGuests);
 
   useEffect(() => {
-    const fetchProperty = async () => {
+    const fetchData = async () => {
       if (!id) return;
 
       setLoading(true);
       try {
-        const response = await propertiesApi.getById(parseInt(id));
-        setProperty(response.data);
+        const [propertyRes, reviewsRes] = await Promise.all([
+          propertiesApi.getById(parseInt(id)),
+          reviewsApi.getReviewsByPropertyId(parseInt(id)),
+        ]);
+        setProperty(propertyRes.data);
+        setReviews(reviewsRes.data);
       } catch (err) {
-        console.error('Ошибка загрузки объекта:', err);
+        console.error('Ошибка загрузки:', err);
         setError('Не удалось загрузить информацию об объекте');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProperty();
+    fetchData();
   }, [id]);
+
+  const handleBookNow = () => {
+    if (!dateRange[0] || !dateRange[1]) {
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Выберите даты бронирования',
+        color: 'red',
+      });
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set('propertyId', id!);
+    params.set('checkIn', dayjs(dateRange[0]).format('YYYY-MM-DD'));
+    params.set('checkOut', dayjs(dateRange[1]).format('YYYY-MM-DD'));
+    params.set('guests', guestsCount.toString());
+
+    navigate(`/booking?${params.toString()}`);
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   if (loading) {
     return (
-      <Center style={{ height: '80vh' }}>
-        <Loader size="xl" />
-      </Center>
+      <>
+        <Header />
+        <Center style={{ height: '80vh' }}>
+          <Loader size="xl" />
+        </Center>
+      </>
     );
   }
 
   if (error || !property) {
     return (
-      <Center style={{ height: '80vh' }}>
-        <Alert color="red" title="Ошибка">
-          {error || 'Объект не найден'}
-        </Alert>
-      </Center>
+      <>
+        <Header />
+        <Container size="md" style={{ marginTop: '10vh' }}>
+          <Alert color="red" title="Ошибка">
+            {error || 'Объект не найден'}
+          </Alert>
+        </Container>
+      </>
     );
   }
 
@@ -121,7 +147,6 @@ export const PropertyDetailsPage: React.FC = () => {
 
   return (
     <>
-      {/* Шапка */}
       <Header />
 
       <Container size="xl" py="xl">
@@ -130,7 +155,7 @@ export const PropertyDetailsPage: React.FC = () => {
           <Grid gutter={8}>
             <Grid.Col span={8}>
               <Image
-                src={property.photos?.[0].photoUrl || 'https://placehold.co/800x500?text=No+Image'}
+                src={property.photos?.[0]?.photoUrl || 'https://placehold.co/800x500?text=No+Image'}
                 height={400}
                 radius="md"
                 style={{ objectFit: 'cover' }}
@@ -139,13 +164,13 @@ export const PropertyDetailsPage: React.FC = () => {
             <Grid.Col span={4}>
               <Stack gap={8}>
                 <Image
-                  src={property.photos?.[1].photoUrl || 'https://placehold.co/400x200?text=No+Image'}
+                  src={property.photos?.[1]?.photoUrl || 'https://placehold.co/400x200?text=No+Image'}
                   height={195}
                   radius="md"
                   style={{ objectFit: 'cover' }}
                 />
                 <Image
-                  src={property.photos?.[2].photoUrl || 'https://placehold.co/400x200?text=No+Image'}
+                  src={property.photos?.[2]?.photoUrl || 'https://placehold.co/400x200?text=No+Image'}
                   height={195}
                   radius="md"
                   style={{ objectFit: 'cover' }}
@@ -167,6 +192,14 @@ export const PropertyDetailsPage: React.FC = () => {
                     <Text c="dimmed">{property.address}, {property.city}</Text>
                   </Group>
                 </Box>
+                <Group>
+                  <Button variant="outline" size="sm" leftSection={<IconHeart size={18} />}>
+                    В избранное
+                  </Button>
+                  <Button variant="outline" size="sm" leftSection={<IconShare size={18} />}>
+                    Поделиться
+                  </Button>
+                </Group>
               </Group>
 
               <Group gap="lg">
@@ -201,7 +234,7 @@ export const PropertyDetailsPage: React.FC = () => {
                 </Group>
                 <Group gap="xs">
                   <IconCalendar size={20} />
-                  <Text>Заселение после 14:00</Text>
+                  <Text>Заселение после 12:00</Text>
                 </Group>
               </Group>
 
@@ -228,8 +261,38 @@ export const PropertyDetailsPage: React.FC = () => {
               <Divider />
 
               <Box>
-                <Title order={3} mb="sm">Отзывы</Title>
-                <Text c="dimmed">Отзывы появятся после первого бронирования</Text>
+                <Title order={3} mb="sm">Отзывы ({reviews.length})</Title>
+                {reviews.length === 0 ? (
+                  <Text c="dimmed">Отзывов пока нет. Будьте первым!</Text>
+                ) : (
+                  <Stack gap="md">
+                    {reviews.map((review) => (
+                      <Card key={review.reviewId} shadow="sm" radius="md" withBorder>
+                        <Group justify="space-between" mb="xs">
+                          <Group gap="sm">
+                            <Avatar
+                              size="md"
+                              radius="xl"
+                              color="blue"
+                            >
+                              {!review.reviewerAvatarUrl && getInitials(review.reviewerName)}
+                            </Avatar>
+                            <Stack gap={2}>
+                              <Text fw={500}>{review.reviewerName}</Text>
+                              <Rating value={review.rating} readOnly size="xs" />
+                            </Stack>
+                          </Group>
+                          <Text size="xs" c="dimmed">
+                            {dayjs(review.createdAt).format('D MMMM YYYY')}
+                          </Text>
+                        </Group>
+                        <Text size="sm" mt="xs" style={{ whiteSpace: 'pre-wrap' }}>
+                          {review.comment || 'Без комментария'}
+                        </Text>
+                      </Card>
+                    ))}
+                  </Stack>
+                )}
               </Box>
             </Stack>
           </Grid.Col>
@@ -280,11 +343,12 @@ export const PropertyDetailsPage: React.FC = () => {
             </Paper>
 
             {cityCoordinates && (
-              <Paper shadow="sm" radius="md" mt="md" style={{ height: 300, overflow: 'hidden'}}>
+              <Paper shadow="sm" radius="md" mt="md" style={{ height: 300, overflow: 'hidden' }}>
                 <PropertyMap
                   properties={[property]}
                   hoveredPropertyId={null}
                   cityCoordinates={cityCoordinates}
+
                 />
               </Paper>
             )}

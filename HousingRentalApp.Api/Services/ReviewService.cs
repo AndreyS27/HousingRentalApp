@@ -106,6 +106,12 @@ namespace HousingRentalApp.Api.Services
             return await _bookingRepository.CanLeaveReviewAsync(bookingId, userId);
         }
 
+        public async Task<List<ReviewResponse>> GetReviewsByPropertyIdAsync(int propertyId)
+        {
+            var reviews = await _reviewRepository.GetByPropertyIdAsync(propertyId);
+            return reviews.Select(MapToResponse).ToList();
+        }
+
         private ReviewResponse MapToResponse(Review review)
         {
             return new ReviewResponse
@@ -119,6 +125,7 @@ namespace HousingRentalApp.Api.Services
                 ReviewerName = review.Reviewer != null
                     ? $"{review.Reviewer.FirstName} {review.Reviewer.LastName}"
                     : "Неизвестный",
+                ReviewerAvatarUrl = review.Reviewer?.AvatarUrl,
                 CreatedAt = review.CreatedAt
             };
         }

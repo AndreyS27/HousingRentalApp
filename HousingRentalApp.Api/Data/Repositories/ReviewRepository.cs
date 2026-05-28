@@ -72,5 +72,16 @@ namespace HousingRentalApp.Api.Data.Repositories
         {
             return await _context.Reviews.AnyAsync(r => r.BookingId == bookingId);
         }
+
+        public async Task<List<Review>> GetByPropertyIdAsync(int propertyId)
+        {
+            return await _context.Reviews
+                .Include(r => r.Reviewer)
+                .Include(r => r.Booking)
+                    .ThenInclude(b => b!.Property)
+                .Where(r => r.PropertyId == propertyId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

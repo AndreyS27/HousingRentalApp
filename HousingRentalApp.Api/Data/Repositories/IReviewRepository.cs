@@ -11,5 +11,6 @@ namespace HousingRentalApp.Api.Data.Repositories
         Task<List<Review>> GetByRenterIdAsync(int renterId);
         Task<List<Review>> GetByOwnerIdAsync(int ownerId);
         Task<bool> ReviewExistsForBookingAsync(int bookingId);
+        Task<List<Review>> GetByPropertyIdAsync(int propertyId);
     }
 }

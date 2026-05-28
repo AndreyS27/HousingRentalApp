@@ -5,6 +5,17 @@ export interface PropertyPhoto {
   uploadedAt: string;
 }
 
+export interface Review {
+  reviewId: number;
+  bookingId: number;
+  propertyId: number;
+  rating: number;
+  comment: string;
+  reviewerName: string;
+  reviewerAvatarUrl?: string | null;
+  createdAt: string;
+}
+
 export interface PropertySummary {
   propertyId: number;
   title: string;
@@ -55,6 +66,7 @@ export interface PropertyDetails extends PropertySummary {
   amenities: string[];
   amenityIds: number[];
   photos: PropertyPhoto[];
+  reviews: Review[];
   reviewsCount: number;
   createdAt: string;
   dateOverrides?: DateOverride[];

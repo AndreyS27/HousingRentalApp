@@ -9,6 +9,7 @@
         public int Rating { get; set; }
         public string? Comment { get; set; }
         public string ReviewerName { get; set; } = string.Empty;
+        public string? ReviewerAvatarUrl { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

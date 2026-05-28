@@ -134,6 +134,18 @@ namespace HousingRentalApp.Api.Controllers
             return Ok(new { canReview });
         }
 
+        /// <summary>
+        /// Получить все отзывы на объект
+        /// GET /api/reviews/property/{propertyId}
+        /// </summary>
+        [HttpGet("property/{propertyId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetReviewsByPropertyId(int propertyId)
+        {
+            var reviews = await _reviewService.GetReviewsByPropertyIdAsync(propertyId);
+            return Ok(reviews);
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
