@@ -15,11 +15,13 @@ import {
   Modal,
   Textarea,
   Rating,
+  ActionIcon,
 } from '@mantine/core';
-import { IconCalendar, IconMessageCircle, IconEdit } from '@tabler/icons-react';
+import { IconCalendar, IconMessageCircle, IconEdit, IconTrash } from '@tabler/icons-react';
 import { RootState } from '../../store';
 import { bookingsApi } from '../../api/bookingsApi';
 import { reviewsApi } from '../../api/reviewsApi';
+import { notifications } from '@mantine/notifications';
 
 interface Booking {
   bookingId: number;
@@ -48,11 +50,25 @@ export const RenterPanel: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Модальное окно для создания отзыва
   const [reviewModalOpened, setReviewModalOpened] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  
+  // Модальное окно для редактирования отзыва
+  const [editModalOpened, setEditModalOpened] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
+  const [editRating, setEditRating] = useState(5);
+  const [editComment, setEditComment] = useState('');
+  const [submittingEdit, setSubmittingEdit] = useState(false);
+  
+  // Модальное окно для подтверждения удаления
+  const [deleteModalOpened, setDeleteModalOpened] = useState(false);
+  const [deletingReview, setDeletingReview] = useState<Review | null>(null);
+  const [submittingDelete, setSubmittingDelete] = useState(false);
 
   useEffect(() => {
     fetchRenterData();
@@ -84,11 +100,22 @@ export const RenterPanel: React.FC = () => {
     try {
       await bookingsApi.cancelBooking(bookingId);
       await fetchRenterData();
+      notifications.show({
+        title: 'Успешно',
+        message: 'Бронирование отменено',
+        color: 'green',
+      });
     } catch (err) {
       console.error('Ошибка отмены бронирования:', err);
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось отменить бронирование',
+        color: 'red',
+      });
     }
   };
 
+  // Создание отзыва
   const openReviewModal = (booking: Booking) => {
     setSelectedBooking(booking);
     setReviewRating(5);
@@ -107,10 +134,85 @@ export const RenterPanel: React.FC = () => {
       });
       setReviewModalOpened(false);
       await fetchRenterData();
+      notifications.show({
+        title: 'Успешно',
+        message: 'Отзыв успешно создан',
+        color: 'green',
+      });
     } catch (err) {
       console.error('Ошибка отправки отзыва:', err);
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось отправить отзыв',
+        color: 'red',
+      });
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  // Редактирование отзыва
+  const openEditModal = (review: Review) => {
+    setEditingReview(review);
+    setEditRating(review.rating);
+    setEditComment(review.comment || '');
+    setEditModalOpened(true);
+  };
+
+  const submitEdit = async () => {
+    if (!editingReview) return;
+    setSubmittingEdit(true);
+    try {
+      await reviewsApi.updateReview(editingReview.reviewId, {
+        rating: editRating,
+        comment: editComment,
+      });
+      setEditModalOpened(false);
+      await fetchRenterData();
+      notifications.show({
+        title: 'Успешно',
+        message: 'Отзыв успешно обновлён',
+        color: 'green',
+      });
+    } catch (err) {
+      console.error('Ошибка обновления отзыва:', err);
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось обновить отзыв',
+        color: 'red',
+      });
+    } finally {
+      setSubmittingEdit(false);
+    }
+  };
+
+  // Удаление отзыва
+  const openDeleteModal = (review: Review) => {
+    setDeletingReview(review);
+    setDeleteModalOpened(true);
+  };
+
+  const submitDelete = async () => {
+    if (!deletingReview) return;
+    setSubmittingDelete(true);
+    try {
+      await reviewsApi.deleteReview(deletingReview.reviewId);
+      setDeleteModalOpened(false);
+      await fetchRenterData();
+      notifications.show({
+        title: 'Успешно',
+        message: 'Отзыв успешно удалён',
+        color: 'green',
+      });
+    } catch (err) {
+      console.error('Ошибка удаления отзыва:', err);
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось удалить отзыв',
+        color: 'red',
+      });
+    } finally {
+      setSubmittingDelete(false);
     }
   };
 
@@ -301,9 +403,24 @@ export const RenterPanel: React.FC = () => {
                       </Table.Td>
                       <Table.Td>{review.comment?.substring(0, 50)}...</Table.Td>
                       <Table.Td>
-                        <Button size="xs" variant="outline" leftSection={<IconEdit size={14} />}>
-                          Редактировать
-                        </Button>
+                        <Group gap="xs">
+                          <ActionIcon
+                            size="sm"
+                            color="blue"
+                            variant="outline"
+                            onClick={() => openEditModal(review)}
+                          >
+                            <IconEdit size={14} />
+                          </ActionIcon>
+                          <ActionIcon
+                            size="sm"
+                            color="red"
+                            variant="outline"
+                            onClick={() => openDeleteModal(review)}
+                          >
+                            <IconTrash size={14} />
+                          </ActionIcon>
+                        </Group>
                       </Table.Td>
                     </Table.Tr>
                   ))}
@@ -314,7 +431,7 @@ export const RenterPanel: React.FC = () => {
         </Accordion.Item>
       </Accordion>
 
-      {/* Модальное окно для отзыва */}
+      {/* Модальное окно для создания отзыва */}
       <Modal
         opened={reviewModalOpened}
         onClose={() => setReviewModalOpened(false)}
@@ -322,9 +439,7 @@ export const RenterPanel: React.FC = () => {
         size="md"
       >
         <Stack gap="md">
-          <Text fw={500}>
-            {selectedBooking?.propertyTitle}
-          </Text>
+          <Text fw={500}>{selectedBooking?.propertyTitle}</Text>
           <Rating value={reviewRating} onChange={setReviewRating} size="lg" />
           <Textarea
             label="Ваш отзыв"
@@ -336,6 +451,50 @@ export const RenterPanel: React.FC = () => {
           <Button onClick={submitReview} loading={submittingReview} fullWidth>
             Отправить отзыв
           </Button>
+        </Stack>
+      </Modal>
+
+      {/* Модальное окно для редактирования отзыва */}
+      <Modal
+        opened={editModalOpened}
+        onClose={() => setEditModalOpened(false)}
+        title="Редактировать отзыв"
+        size="md"
+      >
+        <Stack gap="md">
+          <Text fw={500}>{editingReview?.propertyTitle}</Text>
+          <Rating value={editRating} onChange={setEditRating} size="lg" />
+          <Textarea
+            label="Ваш отзыв"
+            placeholder="Расскажите о вашем опыте..."
+            value={editComment}
+            onChange={(e) => setEditComment(e.target.value)}
+            minRows={4}
+          />
+          <Button onClick={submitEdit} loading={submittingEdit} fullWidth>
+            Сохранить изменения
+          </Button>
+        </Stack>
+      </Modal>
+
+      {/* Модальное окно для подтверждения удаления */}
+      <Modal
+        opened={deleteModalOpened}
+        onClose={() => setDeleteModalOpened(false)}
+        title="Удаление отзыва"
+        size="sm"
+      >
+        <Stack gap="md">
+          <Text>Вы уверены, что хотите удалить отзыв на объект "{deletingReview?.propertyTitle}"?</Text>
+          <Text size="sm" c="dimmed">Это действие нельзя отменить.</Text>
+          <Group justify="space-between">
+            <Button variant="default" onClick={() => setDeleteModalOpened(false)}>
+              Отмена
+            </Button>
+            <Button color="red" onClick={submitDelete} loading={submittingDelete}>
+              Удалить
+            </Button>
+          </Group>
         </Stack>
       </Modal>
     </Stack>
