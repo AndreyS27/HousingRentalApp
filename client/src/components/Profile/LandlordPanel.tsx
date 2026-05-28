@@ -381,7 +381,7 @@ export const LandlordPanel: React.FC = () => {
                     <Table.Th>Оценка</Table.Th>
                     <Table.Th>Отзыв</Table.Th>
                     <Table.Th>Автор</Table.Th>
-                    <Table.Th>Действия</Table.Th>
+                    
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -400,11 +400,6 @@ export const LandlordPanel: React.FC = () => {
                       </Table.Td>
                       <Table.Td>{review.comment?.substring(0, 50)}...</Table.Td>
                       <Table.Td>{review.reviewerName}</Table.Td>
-                      <Table.Td>
-                        <Button size="xs" variant="outline">
-                          Подробнее
-                        </Button>
-                      </Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>

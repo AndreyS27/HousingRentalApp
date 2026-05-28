@@ -9,7 +9,7 @@ export const bookingsApi = {
   getBookingRequestsForOwner: () => api.get('/bookings/owner/requests'),
   getActiveBookingsForOwner: () => api.get('/bookings/owner/active'),
   getPastBookingsForOwner: () => api.get('/bookings/owner/past'),
-  getReviewsForOwner: () => api.get('/bookings/owner/reviews'),
+  getReviewsForOwner: () => api.get('/Reviews/owner'),
   
   // Действия
   create: (data: { propertyId: number; checkInDate: string; checkOutDate: string; guestsCount: number }) =>
