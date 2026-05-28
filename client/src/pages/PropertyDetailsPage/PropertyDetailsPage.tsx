@@ -19,8 +19,10 @@ import {
   Box,
   Avatar,
   Card,
+  ActionIcon,
+  Modal,
 } from '@mantine/core';
-import { IconMapPin, IconUsers, IconBed, IconBath, IconCalendar, IconHeart, IconShare, IconStar } from '@tabler/icons-react';
+import { IconMapPin, IconUsers, IconBed, IconBath, IconCalendar, IconHeart, IconShare, IconX } from '@tabler/icons-react';
 import { DatePickerInput } from '@mantine/dates';
 import { NumberInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -31,6 +33,8 @@ import { reviewsApi } from '../../api/reviewsApi';
 import { PropertyDetails, Review } from '../../types';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
+import '@mantine/carousel/styles.css';
+import { Carousel } from '@mantine/carousel';
 
 dayjs.locale('ru');
 
@@ -64,6 +68,11 @@ export const PropertyDetailsPage: React.FC = () => {
     initialCheckOut ? new Date(initialCheckOut) : null,
   ]);
   const [guestsCount, setGuestsCount] = useState<number>(initialGuests);
+
+  // Состояние для галереи
+  const [galleryOpened, setGalleryOpened] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const photos = property?.photos || [];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -116,6 +125,12 @@ export const PropertyDetailsPage: React.FC = () => {
       .slice(0, 2);
   };
 
+  // --- Вспомогательная функция для открытия модального окна с выбранным фото ---
+  const openGallery = (index: number) => {
+    setSelectedPhotoIndex(index);
+    setGalleryOpened(true);
+  };
+
   if (loading) {
     return (
       <>
@@ -145,40 +160,193 @@ export const PropertyDetailsPage: React.FC = () => {
       ? [property.latitude, property.longitude]
       : null;
 
+  // --- Блок с рендерингом галереи ---
+  const renderGallery = () => {
+    // Если фотографий нет, показываем заглушку
+    if (photos.length === 0) {
+      return (
+        <Paper shadow="sm" radius="md" mb="xl">
+          <Image
+            src="https://placehold.co/1200x600?text=Нет+фотографий"
+            height={400}
+            radius="md"
+            fit="cover"
+          />
+        </Paper>
+      );
+    }
+
+    // --- Случай 1: Одна фотография ---
+    if (photos.length === 1) {
+      return (
+        <Paper shadow="sm" radius="md" mb="xl">
+          <Image
+            src={photos[0].photoUrl}
+            height={400}
+            radius="md"
+            style={{ objectFit: 'cover', cursor: 'pointer' }}
+            onClick={() => openGallery(0)}
+          />
+        </Paper>
+      );
+    }
+
+    // --- Случай 2: Две фотографии ---
+    if (photos.length === 2) {
+      return (
+        <Paper shadow="sm" radius="md" mb="xl">
+          <Grid gutter={8}>
+            <Grid.Col span={6}>
+              <Image
+                src={photos[0].photoUrl}
+                height={400}
+                radius="md"
+                style={{ objectFit: 'cover', cursor: 'pointer' }}
+                onClick={() => openGallery(0)}
+              />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Image
+                src={photos[1].photoUrl}
+                height={400}
+                radius="md"
+                style={{ objectFit: 'cover', cursor: 'pointer' }}
+                onClick={() => openGallery(1)}
+              />
+            </Grid.Col>
+          </Grid>
+        </Paper>
+      );
+    }
+
+    // --- Случай 3: Три или более фотографий ---
+    // Показываем первую большую, а справа две маленькие и кнопку "Показать все"
+    const remainingPhotosCount = photos.length - 3;
+
+    return (
+      <Paper shadow="sm" radius="md" mb="xl">
+        <Grid gutter={8}>
+          <Grid.Col span={8}>
+            <Image
+              src={photos[0].photoUrl}
+              height={400}
+              radius="md"
+              style={{ objectFit: 'cover', cursor: 'pointer' }}
+              onClick={() => openGallery(0)}
+            />
+          </Grid.Col>
+          <Grid.Col span={4}>
+            <Stack gap={8}>
+              <div style={{ position: 'relative' }}>
+                <Image
+                  src={photos[1].photoUrl}
+                  height={195}
+                  radius="md"
+                  style={{ objectFit: 'cover', cursor: 'pointer' }}
+                  onClick={() => openGallery(1)}
+                />
+              </div>
+              <div style={{ position: 'relative' }}>
+                <Image
+                  src={photos[2].photoUrl}
+                  height={195}
+                  radius="md"
+                  style={{ objectFit: 'cover', cursor: 'pointer' }}
+                  onClick={() => openGallery(2)}
+                />
+                {remainingPhotosCount > 0 && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: 'rgba(0,0,0,0.6)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => openGallery(2)}
+                  >
+                    <Text c="white" fw={700} size="lg">
+                      +{remainingPhotosCount}
+                    </Text>
+                  </div>
+                )}
+              </div>
+            </Stack>
+          </Grid.Col>
+        </Grid>
+      </Paper>
+    );
+  };
+
+  // --- Модальное окно для просмотра всех фотографий ---
+  const renderGalleryModal = () => {
+    if (photos.length === 0) return null;
+
+    return (
+      <Modal
+        opened={galleryOpened}
+        onClose={() => setGalleryOpened(false)}
+        fullScreen
+        withCloseButton={false}
+        padding={0}
+        zIndex={1000}
+      >
+        <div style={{ position: 'relative', height: '100vh' }}>
+          <ActionIcon
+            size="lg"
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 20,
+              zIndex: 10,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+            }}
+            radius="xl"
+            onClick={() => setGalleryOpened(false)}
+          >
+            <IconX size={24} color="white" />
+          </ActionIcon>
+          <Carousel
+            loop
+            withIndicators
+            initialSlide={selectedPhotoIndex}
+            height="100vh"
+            styles={{
+              root: { height: '100vh' },
+              slide: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+              indicator: { backgroundColor: 'white' },
+            }}
+          >
+            {photos.map((photo, index) => (
+              <Carousel.Slide key={index}>
+                <Image
+                  src={photo.photoUrl}
+                  fit="contain"
+                  height="100vh"
+                  alt={`Фото ${index + 1}`}
+                />
+              </Carousel.Slide>
+            ))}
+          </Carousel>
+        </div>
+      </Modal>
+    );
+  };
+
   return (
     <>
       <Header />
 
       <Container size="xl" py="xl">
         {/* Галерея фотографий */}
-        <Paper shadow="sm" radius="md" mb="xl">
-          <Grid gutter={8}>
-            <Grid.Col span={8}>
-              <Image
-                src={property.photos?.[0]?.photoUrl || 'https://placehold.co/800x500?text=No+Image'}
-                height={400}
-                radius="md"
-                style={{ objectFit: 'cover' }}
-              />
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <Stack gap={8}>
-                <Image
-                  src={property.photos?.[1]?.photoUrl || 'https://placehold.co/400x200?text=No+Image'}
-                  height={195}
-                  radius="md"
-                  style={{ objectFit: 'cover' }}
-                />
-                <Image
-                  src={property.photos?.[2]?.photoUrl || 'https://placehold.co/400x200?text=No+Image'}
-                  height={195}
-                  radius="md"
-                  style={{ objectFit: 'cover' }}
-                />
-              </Stack>
-            </Grid.Col>
-          </Grid>
-        </Paper>
+        {renderGallery()}
+        {renderGalleryModal()}
 
         {/* Основная информация */}
         <Grid gutter="xl">
