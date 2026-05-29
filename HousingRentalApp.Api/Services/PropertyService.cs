@@ -33,13 +33,13 @@ namespace HousingRentalApp.Api.Services
             var properties = await _propertyRepository.SearchAsync(
                 request.City, request.CheckInDate, request.CheckOutDate,
                 request.GuestsCount, request.MinPrice, request.MaxPrice,
-                request.PropertyTypeId, request.BedroomsCount,
+                request.PropertyTypeId, request.BedroomsCount, request.BedsCount, request.Amenities,
                 request.Page, request.PageSize);
 
             var totalCount = await _propertyRepository.GetSearchCountAsync(
                 request.City, request.CheckInDate, request.CheckOutDate,
                 request.GuestsCount, request.MinPrice, request.MaxPrice,
-                request.PropertyTypeId, request.BedroomsCount);
+                request.PropertyTypeId, request.BedroomsCount, request.BedsCount, request.Amenities);
 
             var summaries = properties.Select(MapToSummary).ToList();
             return (summaries, totalCount);

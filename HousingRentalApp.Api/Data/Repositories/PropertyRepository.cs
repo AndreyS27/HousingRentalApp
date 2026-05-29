@@ -52,12 +52,15 @@ namespace HousingRentalApp.Api.Data.Repositories
         // Поиск с фильтрацией
         public async Task<List<Property>> SearchAsync(string? city, DateOnly? checkIn, DateOnly? checkOut,
             int? guestsCount, decimal? minPrice, decimal? maxPrice, int? propertyTypeId,
-            int? bedroomsCount, int page, int pageSize)
+            int? bedroomsCount, int? bedsCount, List<string>? amenities,
+            int page, int pageSize)
         {
             var query = _context.Properties
                 .Include(p => p.PropertyType)
                 .Include(p => p.PropertyPhotos)
                 .Include(p => p.Reviews)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
                 .Where(p => p.IsActive == true);
 
             if (!string.IsNullOrWhiteSpace(city))
@@ -89,6 +92,20 @@ namespace HousingRentalApp.Api.Data.Repositories
                 query = query.Where(p => p.BedroomsCount >= bedroomsCount.Value);
             }
 
+            if (bedsCount.HasValue)
+            {
+                query = query.Where(p => p.BedsCount >= bedsCount.Value);
+            }
+
+            // Фильтр по удобствам
+            if (amenities != null && amenities.Any())
+            {
+                foreach (var amenity in amenities)
+                {
+                    query = query.Where(p => p.PropertyAmenities.Any(pa => pa.Amenity != null && pa.Amenity.AmenityName == amenity));
+                }
+            }
+
             // Проверка доступности объекта в выбранные даты
             if (checkIn.HasValue && checkOut.HasValue && checkOut > checkIn)
             {
@@ -103,20 +120,23 @@ namespace HousingRentalApp.Api.Data.Repositories
                     pa.PropertyId == p.PropertyId &&
                     pa.IsAvailable == false &&
                     pa.Date >= checkIn.Value &&
-                    pa.Date < checkOut.Value 
+                    pa.Date < checkOut.Value
                 ));
             }
 
-            query = query.Skip((page - 1)  * pageSize).Take(pageSize);
+            query = query.Skip((page - 1) * pageSize).Take(pageSize);
 
             return await query.ToListAsync();
         }
 
         public async Task<int> GetSearchCountAsync(string? city, DateOnly? checkIn, DateOnly? checkOut,
-            int? guestsCount, decimal? minPrice, decimal? maxPrice,
-            int? propertyTypeId, int? bedroomsCount)
+            int? guestsCount, decimal? minPrice, decimal? maxPrice, int? propertyTypeId,
+            int? bedroomsCount, int? bedsCount, List<string>? amenities)
         {
-            var query = _context.Properties.Where(p => p.IsActive == true);
+            var query = _context.Properties
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Where(p => p.IsActive == true);
 
             if (!string.IsNullOrWhiteSpace(city))
                 query = query.Where(p => p.City.ToLower().Contains(city.ToLower()));
@@ -134,6 +154,21 @@ namespace HousingRentalApp.Api.Data.Repositories
 
             if (bedroomsCount.HasValue)
                 query = query.Where(p => p.BedroomsCount >= bedroomsCount.Value);
+
+            // Фильтр по количеству кроватей
+            if (bedsCount.HasValue)
+            {
+                query = query.Where(p => p.BedsCount >= bedsCount.Value);
+            }
+
+            // Фильтр по удобствам
+            if (amenities != null && amenities.Any())
+            {
+                foreach (var amenity in amenities)
+                {
+                    query = query.Where(p => p.PropertyAmenities.Any(pa => pa.Amenity != null && pa.Amenity.AmenityName == amenity));
+                }
+            }
 
             if (checkIn.HasValue && checkOut.HasValue && checkOut > checkIn)
             {

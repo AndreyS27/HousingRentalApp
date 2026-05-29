@@ -5,6 +5,20 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  paramsSerializer: (params) => {
+    // Используем encodeURIComponent для правильной кодировки кириллицы
+    return Object.keys(params)
+      .map(key => {
+        const value = params[key];
+        if (value === undefined || value === null) return null;
+        if (Array.isArray(value)) {
+          return value.map(v => `${encodeURIComponent(key)}=${encodeURIComponent(v)}`).join('&');
+        }
+        return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+      })
+      .filter(Boolean)
+      .join('&');
+  },
 });
 
 api.interceptors.request.use(

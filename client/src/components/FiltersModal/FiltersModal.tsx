@@ -1,5 +1,7 @@
-import React from 'react';
-import { Modal, NumberInput, Button, Group, Stack, Checkbox, Divider, Title } from '@mantine/core';
+import React, { useState, useEffect } from 'react';
+import { Modal, NumberInput, Button, Group, Stack, Checkbox, Divider, Select, RangeSlider, Text, Box } from '@mantine/core';
+import { propertyTypesApi } from '../../api/propertyTypesApi';
+import { PropertyType } from '../../types';
 
 interface FiltersModalProps {
   opened: boolean;
@@ -10,6 +12,12 @@ interface FiltersModalProps {
   setBedsCount: (value: number | null) => void;
   selectedAmenities: string[];
   setSelectedAmenities: (value: string[]) => void;
+  minPrice: number | null;
+  setMinPrice: (value: number | null) => void;
+  maxPrice: number | null;
+  setMaxPrice: (value: number | null) => void;
+  propertyTypeId: number | null;
+  setPropertyTypeId: (value: number | null) => void;
   onApply: () => void;
   onReset: () => void;
 }
@@ -37,9 +45,35 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
   setBedsCount,
   selectedAmenities,
   setSelectedAmenities,
+  minPrice,
+  setMinPrice,
+  maxPrice,
+  setMaxPrice,
+  propertyTypeId,
+  setPropertyTypeId,
   onApply,
   onReset,
 }) => {
+  const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
+  const [loadingTypes, setLoadingTypes] = useState(false);
+  const [selectKey, setSelectKey] = useState(0); // Добавлено
+
+  useEffect(() => {
+    const fetchPropertyTypes = async () => {
+      setLoadingTypes(true);
+      try {
+        const response = await propertyTypesApi.getAll();
+        setPropertyTypes(response.data);
+        setSelectKey(prev => prev + 1); // Принудительно обновляем Select после загрузки
+      } catch (err) {
+        console.error('Ошибка загрузки типов объектов:', err);
+      } finally {
+        setLoadingTypes(false);
+      }
+    };
+    fetchPropertyTypes();
+  }, []);
+
   const handleApply = () => {
     onApply();
     onClose();
@@ -49,6 +83,9 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
     setBedroomsCount(null);
     setBedsCount(null);
     setSelectedAmenities([]);
+    setMinPrice(null);
+    setMaxPrice(null);
+    setPropertyTypeId(null);
     onReset();
   };
 
@@ -61,14 +98,82 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
   };
 
   return (
-    <Modal 
-      opened={opened} 
-      onClose={onClose} 
-      title="Фильтры" 
+
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="Фильтры"
       size="md"
       zIndex={1000}
     >
-      <Stack gap="md">
+      <Stack gap="md" m='xs'>
+        {/* Фильтр по типу жилья */}
+        <Box>
+          <Text fw={500} size="sm" mb={4}>
+            Тип жилья
+          </Text>
+          <select
+            value={propertyTypeId?.toString() || ''}
+            onChange={(e) => setPropertyTypeId(e.target.value ? parseInt(e.target.value) : null)}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid #ced4da',
+              backgroundColor: 'white',
+              fontSize: '14px',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="">Любой</option>
+            {propertyTypes.map((pt) => (
+              <option key={pt.propertyTypeId} value={pt.propertyTypeId.toString()}>
+                {pt.typeName}
+              </option>
+            ))}
+          </select>
+        </Box>
+
+        {/* Фильтр по цене */}
+        <Box>
+          <Text fw={500} size="sm" mb="xs">
+            Цена за ночь
+          </Text>
+          <RangeSlider mb='lg'
+            min={0}
+            max={50000}
+            step={500}
+            value={[minPrice || 0, maxPrice || 50000]}
+            onChange={(value) => {
+              setMinPrice(value[0]);
+              setMaxPrice(value[1]);
+            }}
+            marks={[
+              { value: 0, label: '0 ₽' },
+              { value: 25000, label: '25 000 ₽' },
+              { value: 50000, label: '50 000 ₽' },
+            ]}
+          />
+          <Group grow mt="xs">
+            <NumberInput
+              placeholder="от"
+              value={minPrice || ''}
+              onChange={(value) => setMinPrice(value === '' ? null : Number(value))}
+              min={0}
+              max={50000}
+            />
+            <NumberInput
+              placeholder="до"
+              value={maxPrice || ''}
+              onChange={(value) => setMaxPrice(value === '' ? null : Number(value))}
+              min={0}
+              max={50000}
+            />
+          </Group>
+        </Box>
+
+        <Divider my="sm" />
+
         {/* Фильтры по спальням и кроватям */}
         <NumberInput
           label="Количество спален"
@@ -78,7 +183,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
           min={0}
           max={20}
         />
-        
+
         <NumberInput
           label="Количество кроватей"
           placeholder="Не важно"
@@ -101,7 +206,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
             />
           ))}
         </Group>
-        
+
         <Divider my="sm" />
 
         <Group justify="space-between" mt="md">

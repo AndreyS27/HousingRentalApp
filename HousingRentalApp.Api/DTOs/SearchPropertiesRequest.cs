@@ -10,6 +10,8 @@
         public decimal? MaxPrice { get; set; }
         public int? PropertyTypeId { get; set; }
         public int? BedroomsCount { get; set; }
+        public int? BedsCount { get; set; }
+        public List<string>? Amenities { get; set; }
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }

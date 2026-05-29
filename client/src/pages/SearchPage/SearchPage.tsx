@@ -47,6 +47,9 @@ export const SearchPage: React.FC = () => {
   const [bedroomsCount, setBedroomsCount] = useState<number | null>(null);
   const [bedsCount, setBedsCount] = useState<number | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [propertyTypeId, setPropertyTypeId] = useState<number | null>(null);
 
   // состояние данных
   const [properties, setProperties] = useState<PropertySummary[]>([]);
@@ -64,6 +67,17 @@ export const SearchPage: React.FC = () => {
       const coords = await geocodeCity(city);
       setCityCoordinates(coords);
 
+      // Логирование для отладки
+      console.log('Отправляемые фильтры:', {
+        city,
+        bedroomsCount,
+        bedsCount,
+        selectedAmenities,
+        minPrice,
+        maxPrice,
+        propertyTypeId,
+      });
+
       const params: SearchParams = {
         city: city,
         checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
@@ -71,6 +85,9 @@ export const SearchPage: React.FC = () => {
         guestsCount: guestsCount || undefined,
         bedroomsCount: bedroomsCount || undefined,
         bedsCount: bedsCount || undefined,
+        minPrice: minPrice || undefined,
+        maxPrice: maxPrice || undefined,
+        propertyTypeId: propertyTypeId || undefined,
         amenities: selectedAmenities.length > 0 ? selectedAmenities : undefined,
         page: 1,
         pageSize: 10,
@@ -85,7 +102,7 @@ export const SearchPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, selectedAmenities]);
+  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, selectedAmenities, minPrice, maxPrice, propertyTypeId]);
 
   useEffect(() => {
     performSearch();
@@ -93,12 +110,16 @@ export const SearchPage: React.FC = () => {
 
   const handleApplyFilters = () => {
     performSearch();
+    setFiltersOpened(false);
   };
 
   const handleResetFilters = () => {
     setBedroomsCount(null);
     setBedsCount(null);
     setSelectedAmenities([]);
+    setMinPrice(null);
+    setMaxPrice(null);
+    setPropertyTypeId(null);
     performSearch();
   };
 
@@ -232,6 +253,12 @@ export const SearchPage: React.FC = () => {
         setBedsCount={setBedsCount}
         selectedAmenities={selectedAmenities}
         setSelectedAmenities={setSelectedAmenities}
+        minPrice={minPrice}
+        setMinPrice={setMinPrice}
+        maxPrice={maxPrice}
+        setMaxPrice={setMaxPrice}
+        propertyTypeId={propertyTypeId}
+        setPropertyTypeId={setPropertyTypeId}
         onApply={handleApplyFilters}
         onReset={handleResetFilters}
       />

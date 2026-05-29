@@ -13,11 +13,12 @@ namespace HousingRentalApp.Api.Data.Repositories
         // Поиск и фильтрация
         Task<List<Property>> SearchAsync(string? city, DateOnly? checkIn, DateOnly? checkOut,
             int? guestsCount, decimal? minPrice, decimal? maxPrice,
-            int? propertyTypeId, int? bedroomsCount, int page, int pageSize);
+            int? propertyTypeId, int? bedroomsCount, int? bedsCount, List<string>? amenities,
+            int page, int pageSize);
 
         Task<int> GetSearchCountAsync(string? city, DateOnly? checkIn, DateOnly? checkOut,
             int? guestsCount, decimal? minPrice, decimal? maxPrice,
-            int? propertyTypeId, int? bedroomsCount);
+            int? propertyTypeId, int? bedroomsCount, int? bedsCount, List<string>? amenities);
 
         // Для арендодателя
         Task<List<Property>> GetByOwnerIdAsync(int ownerId);
