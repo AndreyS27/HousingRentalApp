@@ -9,6 +9,8 @@ import {
   Alert,
   Text,
   ScrollArea,
+  Pagination,
+  Group
 } from '@mantine/core';
 import { IconSearch, IconFilter, IconCalendar, IconUsers } from '@tabler/icons-react';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
@@ -55,10 +57,12 @@ export const SearchPage: React.FC = () => {
   const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
 
-  const performSearch = useCallback(async () => {
+  const performSearch = useCallback(async (page: number = currentPage) => {
     if (!city.trim()) return;
 
     setLoading(true);
@@ -66,17 +70,6 @@ export const SearchPage: React.FC = () => {
     try {
       const coords = await geocodeCity(city);
       setCityCoordinates(coords);
-
-      // Логирование для отладки
-      console.log('Отправляемые фильтры:', {
-        city,
-        bedroomsCount,
-        bedsCount,
-        selectedAmenities,
-        minPrice,
-        maxPrice,
-        propertyTypeId,
-      });
 
       const params: SearchParams = {
         city: city,
@@ -89,13 +82,18 @@ export const SearchPage: React.FC = () => {
         maxPrice: maxPrice || undefined,
         propertyTypeId: propertyTypeId || undefined,
         amenities: selectedAmenities.length > 0 ? selectedAmenities : undefined,
-        page: 1,
+        page: page,
         pageSize: 10,
       };
 
       const response = await propertiesApi.search(params);
       setProperties(response.data.properties || []);
       setTotalCount(response.data.totalCount || 0);
+      setTotalPages(response.data.totalPages || 1);
+      setCurrentPage(response.data.currentPage || 1);
+
+      // Прокручиваем страницу к началу списка при смене страницы
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (error) {
       console.error('Ошибка поиска:', error);
@@ -103,6 +101,17 @@ export const SearchPage: React.FC = () => {
       setLoading(false);
     }
   }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, selectedAmenities, minPrice, maxPrice, propertyTypeId]);
+
+  // Обёртка для поиска без параметра страницы (использует текущую страницу)
+  const handleSearch = useCallback(() => {
+    setCurrentPage(1);
+    performSearch(1);
+  }, [performSearch]);
+
+  // Обработчик смены страницы
+  const handlePageChange = (page: number) => {
+    performSearch(page);
+  };
 
   useEffect(() => {
     performSearch();
@@ -121,6 +130,8 @@ export const SearchPage: React.FC = () => {
     setMaxPrice(null);
     setPropertyTypeId(null);
     performSearch();
+    setCurrentPage(1);
+    performSearch(1);
   };
 
 
@@ -165,7 +176,7 @@ export const SearchPage: React.FC = () => {
           </Grid.Col>
 
           <Grid.Col span={2}>
-            <Button fullWidth onClick={performSearch} loading={loading}>
+            <Button fullWidth onClick={handleSearch} loading={loading}>
               Найти
             </Button>
           </Grid.Col>
@@ -187,7 +198,7 @@ export const SearchPage: React.FC = () => {
       <div style={{ flex: 1, minHeight: 0, padding: '16px' }}>
         <Grid style={{ height: '100%' }}>
           {/* Левая колонка — карточки с использованием ScrollArea */}
-          <Grid.Col span={6} style={{ height: '100%' }}>
+          <Grid.Col span={6} style={{ height: '750px' }}>
             {loading ? (
               <Center style={{ height: '100%' }}>
                 <Loader size="xl" />
@@ -221,6 +232,20 @@ export const SearchPage: React.FC = () => {
                     ))}
                   </Grid>
                 </ScrollArea>
+
+                {/* Пагинация */}
+                {totalPages > 1 && (
+                  <Group justify="center" mt="md">
+                    <Pagination
+                      total={totalPages}
+                      value={currentPage}
+                      onChange={handlePageChange}
+                      color="blue"
+                      size="md"
+                      withEdges
+                    />
+                  </Group>
+                )}
               </div>
             )}
           </Grid.Col>
