@@ -7,6 +7,7 @@ import { Notifications } from '@mantine/notifications';
 import { store } from './store';
 import App from './App';
 import './index.css';
+import './config/dayjs';
 
 // Импорт стилей Mantine
 import '@mantine/core/styles.css';

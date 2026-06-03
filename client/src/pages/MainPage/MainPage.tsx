@@ -12,7 +12,10 @@ import {
 import { IconSearch, IconCalendar, IconUsers } from '@tabler/icons-react';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
 import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
 import { Header } from '../../components/Layout/Header/Header';
+
+dayjs.locale('ru');
 
 export const MainPage: React.FC = () => {
   const navigate = useNavigate();
@@ -68,6 +71,7 @@ export const MainPage: React.FC = () => {
               onChange={setDateRange}
               leftSection={<IconCalendar size={20} />}
               minDate={new Date()}
+              locale="ru"
             />
 
             <TextInput

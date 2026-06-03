@@ -169,7 +169,7 @@ export const LandlordPanel: React.FC = () => {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>Название</Table.Th>
-                    <Table.Th>Адрес</Table.Th>
+                    {/* <Table.Th>Адрес</Table.Th> */}
                     <Table.Th>Цена за ночь</Table.Th>
                     <Table.Th>Статус</Table.Th>
                     <Table.Th>Действия</Table.Th>
@@ -186,7 +186,7 @@ export const LandlordPanel: React.FC = () => {
                           {property.title}
                         </Text>
                       </Table.Td>
-                      <Table.Td>{property.city}, {property.address}</Table.Td>
+                      {/* <Table.Td>{property.city}, {property.address}</Table.Td> */}
                       <Table.Td>{property.pricePerNight.toLocaleString()} ₽</Table.Td>
                       <Table.Td>
                         <Badge color={property.isActive ? 'green' : 'gray'}>

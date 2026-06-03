@@ -83,7 +83,7 @@ export const SearchPage: React.FC = () => {
         propertyTypeId: propertyTypeId || undefined,
         amenities: selectedAmenities.length > 0 ? selectedAmenities : undefined,
         page: page,
-        pageSize: 10,
+        pageSize: 4,
       };
 
       const response = await propertiesApi.search(params);
@@ -161,6 +161,7 @@ export const SearchPage: React.FC = () => {
               leftSection={<IconCalendar size={16} />}
               minDate={new Date()}
               popoverProps={{ zIndex: 1000 }}
+              locale="ru"
             />
           </Grid.Col>
 

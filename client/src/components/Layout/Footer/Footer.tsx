@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
           <Divider />
           
           <Text size="xs" c="dimmed" ta="center">
-            © {new Date().getFullYear()} HousingRental. Все права защищены.
+            © {new Date().getFullYear()} Аренда Жилья. Все права защищены.
           </Text>
         </Stack>
       </Container>

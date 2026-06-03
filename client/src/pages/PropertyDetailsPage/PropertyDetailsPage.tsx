@@ -455,7 +455,7 @@ export const PropertyDetailsPage: React.FC = () => {
                           </Text>
                         </Group>
                         <Text size="sm" mt="xs" style={{ whiteSpace: 'pre-wrap' }}>
-                          {review.comment || 'Без комментария'}
+                          {review.comment || ''}
                         </Text>
                       </Card>
                     ))}
@@ -484,6 +484,7 @@ export const PropertyDetailsPage: React.FC = () => {
                     onChange={setDateRange}
                     minDate={new Date()}
                     popoverProps={{ zIndex: 1000 }}
+                    locale="ru"
                   />
                 </Stack>
 
