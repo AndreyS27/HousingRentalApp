@@ -509,6 +509,7 @@ export const EditPropertyPage: React.FC = () => {
                                         placeholder="Выберите дату"
                                         value={override.date}
                                         onChange={(value) => updateDateOverride(index, 'date', value)}
+                                        locale='ru'
                                     />
                                 </Grid.Col>
                                 <Grid.Col span={3}>
