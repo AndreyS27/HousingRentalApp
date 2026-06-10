@@ -285,6 +285,8 @@ export const PropertyDetailsPage: React.FC = () => {
   };
 
   // --- Модальное окно для просмотра всех фотографий ---
+  // --- Модальное окно для просмотра всех фотографий ---
+  // --- Модальное окно для просмотра всех фотографий ---
   const renderGalleryModal = () => {
     if (photos.length === 0) return null;
 
@@ -296,8 +298,22 @@ export const PropertyDetailsPage: React.FC = () => {
         withCloseButton={false}
         padding={0}
         zIndex={1000}
+        styles={{
+          body: { padding: 0, margin: 0, height: '100vh' },
+          inner: { padding: 0 },
+        }}
       >
-        <div style={{ position: 'relative', height: '100vh' }}>
+        <div
+          style={{
+            position: 'relative',
+            height: '100vh',
+            width: '100vw',
+            backgroundColor: '#000',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <ActionIcon
             size="lg"
             style={{
@@ -312,28 +328,54 @@ export const PropertyDetailsPage: React.FC = () => {
           >
             <IconX size={24} color="white" />
           </ActionIcon>
-          <Carousel
-            loop
-            withIndicators
-            initialSlide={selectedPhotoIndex}
-            height="100vh"
-            styles={{
-              root: { height: '100vh' },
-              slide: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
-              indicator: { backgroundColor: 'white' },
-            }}
-          >
-            {photos.map((photo, index) => (
-              <Carousel.Slide key={index}>
-                <Image
-                  src={photo.photoUrl}
-                  fit="contain"
-                  height="100vh"
-                  alt={`Фото ${index + 1}`}
-                />
-              </Carousel.Slide>
-            ))}
-          </Carousel>
+
+          <div style={{ width: '100%', height: '100%' }}>
+            <Carousel
+              loop
+              withIndicators
+              withControls  // ← Включает стрелки
+              initialSlide={selectedPhotoIndex}
+              height="100%"
+              style={{ height: '100%' }}
+              styles={{
+                root: { height: '100%' },
+                viewport: { height: '100%' },
+                container: { height: '100%' },
+                slide: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                },
+                indicator: { backgroundColor: 'white' },
+                control: {
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  color: 'white',
+                  border: 'none',
+                  width: 40,
+                  height: 40,
+                  borderRadius: 40,
+                  margin: 20,
+                },
+              }}
+            >
+              {photos.map((photo, index) => (
+                <Carousel.Slide key={index}>
+                  <img
+                    src={photo.photoUrl}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                    }}
+                    alt={`Фото ${index + 1}`}
+                  />
+                </Carousel.Slide>
+              ))}
+            </Carousel>
+          </div>
         </div>
       </Modal>
     );

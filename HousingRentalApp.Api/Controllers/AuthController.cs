@@ -56,7 +56,7 @@ namespace HousingRentalApp.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // Простая валидация, позже изменить
+            // Простая валидация
             if (string.IsNullOrWhiteSpace(request.Email))
                 return BadRequest(new { message = "Email обязателен" });
 
