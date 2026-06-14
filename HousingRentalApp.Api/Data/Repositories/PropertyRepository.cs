@@ -22,6 +22,7 @@ namespace HousingRentalApp.Api.Data.Repositories
                 .Include(p => p.PropertyPhotos)
                 .Include(p => p.Reviews)
                 .Include(p => p.PropertyAvailabilities)
+                .Include(p => p.Views)
                 .FirstOrDefaultAsync(p => p.PropertyId == properyId);
         }
 

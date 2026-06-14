@@ -44,7 +44,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
-    
+    public virtual DbSet<PropertyView> PropertyViews { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -426,6 +427,45 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("user_roles_user_id_fkey");
+        });
+
+        modelBuilder.Entity<PropertyView>(entity =>
+        {
+            entity.HasKey(e => e.ViewId).HasName("property_views_pkey");
+
+            entity.ToTable("property_views");
+
+            entity.Property(e => e.ViewId)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("view_id");
+
+            entity.Property(e => e.PropertyId)
+                .HasColumnName("property_id");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
+
+            entity.Property(e => e.ViewDate)
+                .HasColumnName("view_date")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(e => e.IpAddress)
+                .HasColumnName("ip_address")
+                .HasMaxLength(45);
+
+            entity.HasIndex(e => e.PropertyId, "idx_property_views_property_id");
+
+            entity.HasOne(d => d.Property)
+                .WithMany(p => p.Views)
+                .HasForeignKey(d => d.PropertyId)
+                .HasConstraintName("fk_property_views_property")
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("fk_property_views_user")
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         OnModelCreatingPartial(modelBuilder);
