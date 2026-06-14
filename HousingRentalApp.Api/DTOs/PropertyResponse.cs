@@ -25,5 +25,6 @@
         public int ReviewsCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<DateOverrideDto> DateOverrides { get; set; } = new List<DateOverrideDto>();
+        public int ViewCount { get; set; }
     }
 }

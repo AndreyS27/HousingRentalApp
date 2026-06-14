@@ -52,4 +52,5 @@ public partial class Property
     public virtual PropertyType PropertyType { get; set; } = null!;
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+    public virtual ICollection<PropertyView> Views { get; set; } = new List<PropertyView>();
 }
