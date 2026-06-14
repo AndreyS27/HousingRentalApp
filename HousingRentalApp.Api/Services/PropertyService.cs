@@ -12,12 +12,18 @@ namespace HousingRentalApp.Api.Services
         private readonly IPropertyRepository _propertyRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ApplicationDbContext _context;
+        private readonly IPropertyViewRepository _propertyViewRepository;
 
-        public PropertyService(IPropertyRepository propertyRepository, IWebHostEnvironment webHostEnvironment, ApplicationDbContext context)
+        public PropertyService(
+            IPropertyRepository propertyRepository, 
+            IWebHostEnvironment webHostEnvironment, 
+            ApplicationDbContext context,
+            IPropertyViewRepository propertyViewRepository)
         {
             _propertyRepository = propertyRepository;
             _webHostEnvironment = webHostEnvironment;
             _context = context;
+            _propertyViewRepository = propertyViewRepository;
         }
 
         public async Task<PropertyResponse?> GetPropertyByIdAsync(int propertyId)
@@ -26,6 +32,25 @@ namespace HousingRentalApp.Api.Services
             if (property == null) return null;
 
             return MapToResponse(property);
+        }
+
+        public async Task<PropertyResponse?> GetPropertyByIdAsync(int propertyId, int? currentUserId = null, string? ipAddress = null)
+        {
+            var property = await _propertyRepository.GetByIdAsync(propertyId);
+            if (property == null) return null;
+
+            // Добавляем запись о просмотре (не учитываем просмотры владельца)
+            if (currentUserId != property.OwnerId)
+            {
+                await _propertyViewRepository.AddViewAsync(propertyId, currentUserId, ipAddress);
+            }
+
+            var viewCount = await _propertyViewRepository.GetViewCountAsync(propertyId);
+
+            var response = MapToResponse(property);
+            response.ViewCount = viewCount;
+
+            return response;
         }
 
         public async Task<(List<PropertySummaryResponse>, int)> SearchPropertiesAsync(SearchPropertiesRequest request)
@@ -259,7 +284,16 @@ namespace HousingRentalApp.Api.Services
         public async Task<List<PropertySummaryResponse>> GetMyPropertiesAsync(int ownerId)
         {
             var properties = await _propertyRepository.GetByOwnerIdAsync(ownerId);
-            return properties.Select(MapToSummary).ToList();
+            var summaries = new List<PropertySummaryResponse>();
+            foreach (var property in properties)
+            {
+                var summary = MapToSummary(property);
+                // Добавляем количество просмотров
+                summary.ViewCount = await _propertyViewRepository.GetViewCountAsync(property.PropertyId);
+                summaries.Add(summary);
+            }
+
+            return summaries;
         }
 
         public async Task<bool> IsOwnerAsync(int propertyId, int userId)
@@ -354,7 +388,8 @@ namespace HousingRentalApp.Api.Services
                 BedroomsCount = property.BedroomsCount,
                 Latitude = property.Latitude,
                 Longitude = property.Longitude,
-                IsActive = property.IsActive
+                IsActive = property.IsActive,
+                ViewCount = property.Views?.Count ?? 0
             };
         }
 
