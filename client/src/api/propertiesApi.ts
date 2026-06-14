@@ -11,6 +11,7 @@ export const propertiesApi = {
   getById: (id: number) =>
     api.get<PropertyDetails>(`/properties/${id}`),
   getMyProperties: () => api.get<PropertySummary[]>('/properties/my'),
+  getPropertyViews: (id: number) => api.get(`/properties/${id}/views`),
   update: (id: number, data: any) => api.put(`/properties/${id}`, data),
   addPhotos: (id: number, formData: FormData) =>
     api.post(`/properties/${id}/photos`, formData, {

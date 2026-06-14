@@ -30,6 +30,7 @@ export interface PropertySummary {
   latitude: number | null;
   longitude: number | null;
   isActive: boolean;
+  viewCount: number;
 }
 
 export interface SearchParams {
