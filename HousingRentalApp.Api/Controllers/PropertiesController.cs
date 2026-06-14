@@ -1,4 +1,5 @@
 ﻿using HousingRentalApp.Api.Data;
+using HousingRentalApp.Api.Data.Repositories;
 using HousingRentalApp.Api.DTOs;
 using HousingRentalApp.Api.Models;
 using HousingRentalApp.Api.Services;
@@ -18,12 +19,18 @@ namespace HousingRentalApp.Api.Controllers
         private readonly IPropertyService _propertyService;
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IPropertyViewRepository _propertyViewRepository;
 
-        public PropertiesController(IPropertyService propertyService, IWebHostEnvironment webHostEnvironment, ApplicationDbContext context)
+        public PropertiesController(
+            IPropertyService propertyService, 
+            IWebHostEnvironment webHostEnvironment, 
+            ApplicationDbContext context,
+            IPropertyViewRepository propertyViewRepository)
         {
             _propertyService = propertyService;
             _webHostEnvironment = webHostEnvironment;
             _context = context;
+            _propertyViewRepository = propertyViewRepository;
         }
 
         /// <summary>
@@ -52,7 +59,10 @@ namespace HousingRentalApp.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var property = await _propertyService.GetPropertyByIdAsync(id);
+            var userId = User.Identity?.IsAuthenticated == true ? GetCurrentUserId() : (int?)null;
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            var property = await _propertyService.GetPropertyByIdAsync(id, userId, ipAddress);
             if (property == null)
                 return NotFound(new { message = "Объект не найден" });
 
@@ -277,6 +287,35 @@ namespace HousingRentalApp.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Главная фотография обновлена" });
+        }
+
+        /// <summary>
+        /// Получить статистику просмотров объекта
+        /// GET /api/properties/{id}/views
+        /// </summary>
+        [Authorize]
+        [HttpGet("{id}/views")]
+        public async Task<IActionResult> GetPropertyViews(int id)
+        {
+            var userId = GetCurrentUserId();
+
+            var isOwner = await _propertyService.IsOwnerAsync(id, userId);
+            if (!isOwner)
+                return Forbid("Вы не являетесь владельцем этого объекта");
+
+            var totalViews = await _propertyViewRepository.GetViewCountAsync(id);
+            var viewsLastWeek = await _propertyViewRepository.GetViewCountForPeriodAsync(id, DateTime.UtcNow.AddDays(-7));
+            var viewsLastMonth = await _propertyViewRepository.GetViewCountForPeriodAsync(id, DateTime.UtcNow.AddDays(-30));
+            var dailyViews = await _propertyViewRepository.GetDailyViewsAsync(id, 30);
+
+            return Ok(new PropertyViewResponse
+            {
+                PropertyId = id,
+                TotalViews = totalViews,
+                ViewsLastWeek = viewsLastWeek,
+                ViewsLastMonth = viewsLastMonth,
+                DailyViews = dailyViews
+            });
         }
 
         /// <summary>
