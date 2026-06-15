@@ -71,6 +71,7 @@ export const LandlordPanel: React.FC = () => {
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [activeBookings, setActiveBookings] = useState<BookingRequest[]>([]);
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
 
   useEffect(() => {
     fetchLandlordData();
@@ -93,6 +94,16 @@ export const LandlordPanel: React.FC = () => {
       setPastBookings(pastRes.data);
       setReviews(reviewsRes.data);
       setActiveBookings(activeRes.data);
+
+      const completedBookings = pastRes.data.filter(
+        (booking: PastBooking) => booking.status === 'Завершено'
+      );
+      const revenue = completedBookings.reduce(
+        (sum: number, booking: PastBooking) => sum + booking.totalPrice,
+        0
+      );
+      setTotalRevenue(revenue);
+
     } catch (err) {
       console.error('Ошибка загрузки данных арендодателя:', err);
       setError('Не удалось загрузить данные');
@@ -190,7 +201,7 @@ export const LandlordPanel: React.FC = () => {
                       <Table.Td>{property.pricePerNight.toLocaleString()} ₽</Table.Td>
                       <Table.Td>
                         <Badge color="blue" variant="light">
-                           {property.viewCount}
+                          {property.viewCount}
                         </Badge>
                       </Table.Td>
                       <Table.Td>
@@ -327,9 +338,14 @@ export const LandlordPanel: React.FC = () => {
         {/* История бронирований объектов */}
         <Accordion.Item value="pastBookings">
           <Accordion.Control>
-            <Group>
-              <IconCalendar size={20} />
-              <Text fw={500}>История бронирований объектов ({pastBookings.length})</Text>
+            <Group justify="space-between" style={{ width: '100%' }}>
+              <Group>
+                <IconCalendar size={20} />
+                <Text fw={500}>История бронирований объектов ({pastBookings.length})</Text>
+              </Group>
+              <Badge size="lg" color="green" variant="filled">
+                Общий доход: {totalRevenue.toLocaleString()} ₽
+              </Badge>
             </Group>
           </Accordion.Control>
           <Accordion.Panel>
@@ -356,9 +372,17 @@ export const LandlordPanel: React.FC = () => {
                           {booking.propertyTitle}
                         </Text>
                       </Table.Td>
-                      <Table.Td>{new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}</Table.Td>
+                      <Table.Td>
+                        {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
+                      </Table.Td>
                       <Table.Td>{booking.totalPrice.toLocaleString()} ₽</Table.Td>
-                      <Table.Td>{booking.status}</Table.Td>
+                      <Table.Td>
+                        {booking.status === 'Завершено' ? (
+                          <Badge color="green">Завершено</Badge>
+                        ) : (
+                          <Badge color="gray">{booking.status}</Badge>
+                        )}
+                      </Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
