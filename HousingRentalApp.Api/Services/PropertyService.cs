@@ -321,6 +321,29 @@ namespace HousingRentalApp.Api.Services
                 })
                 .ToList() ?? new List<DateOverrideDto>();
 
+            // Получаем заблокированные даты (подтверждённые бронирования + ручные блокировки)
+            var blockedDates = new List<string>();
+
+            // Подтверждённые бронирования (status_id = 2)
+            var confirmedBookings = property.Bookings?.Where(b => b.StatusId == 2).ToList() ?? new List<Booking>();
+            foreach (var booking in confirmedBookings)
+            {
+                for (var date = booking.CheckInDate; date < booking.CheckOutDate; date = date.AddDays(1))
+                {
+                    blockedDates.Add(date.ToString("yyyy-MM-dd"));
+                }
+            }
+
+            // Ручные блокировки дат (IsAvailable = false)
+            var manualBlocks = property.PropertyAvailabilities?.Where(pa => pa.IsAvailable == false).ToList() ?? new List<PropertyAvailability>();
+            foreach (var block in manualBlocks)
+            {
+                blockedDates.Add(block.Date.ToString("yyyy-MM-dd"));
+            }
+
+            // Убираем дубликаты
+            blockedDates = blockedDates.Distinct().ToList();
+
             return new PropertyResponse
             {
                 PropertyId = property.PropertyId,
@@ -360,7 +383,8 @@ namespace HousingRentalApp.Api.Services
                 AverageRating = averageRating,
                 ReviewsCount = property.Reviews?.Count ?? 0,
                 CreatedAt = property.CreatedAt,
-                DateOverrides = dateOverrides
+                DateOverrides = dateOverrides,
+                BlockedDates = blockedDates
             };
         }
 

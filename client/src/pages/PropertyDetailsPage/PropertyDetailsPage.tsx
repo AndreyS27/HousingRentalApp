@@ -51,6 +51,7 @@ export const PropertyDetailsPage: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
 
   // Состояние для модального окна авторизации
   const [authModalOpened, setAuthModalOpened] = useState(false);
@@ -93,6 +94,7 @@ export const PropertyDetailsPage: React.FC = () => {
           reviewsApi.getReviewsByPropertyId(parseInt(id)),
         ]);
         setProperty(propertyRes.data);
+        setBlockedDates(propertyRes.data.blockedDates || []);
         setReviews(reviewsRes.data);
       } catch (err) {
         console.error('Ошибка загрузки:', err);
@@ -536,7 +538,7 @@ export const PropertyDetailsPage: React.FC = () => {
               </Box>
             </Stack>
           </Grid.Col>
-          
+
           {/* Правая колонка - бронирование */}
           <Grid.Col span={4}>
             <Paper shadow="lg" p="xl" radius="md" withBorder>
@@ -558,6 +560,12 @@ export const PropertyDetailsPage: React.FC = () => {
                     minDate={new Date()}
                     popoverProps={{ zIndex: 1000 }}
                     locale="ru"
+                    excludeDate={(date) => {
+                      // Форматируем дату в строку для сравнения
+                      const dateStr = dayjs(date).format('YYYY-MM-DD');
+                      // Блокируем дату, если она есть в списке заблокированных
+                      return blockedDates.includes(dateStr);
+                    }}
                   />
                 </Stack>
 
@@ -607,7 +615,7 @@ export const PropertyDetailsPage: React.FC = () => {
           <Text ta="center" size="lg">
             Для продолжения бронирования войдите или зарегистрируйтесь
           </Text>
-          
+
           <Group justify="center" gap="xl">
             <Button
               component="a"

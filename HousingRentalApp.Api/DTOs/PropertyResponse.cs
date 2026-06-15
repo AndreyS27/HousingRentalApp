@@ -26,5 +26,6 @@
         public DateTime CreatedAt { get; set; }
         public List<DateOverrideDto> DateOverrides { get; set; } = new List<DateOverrideDto>();
         public int ViewCount { get; set; }
+        public List<string> BlockedDates { get; set; } = new List<string>();
     }
 }

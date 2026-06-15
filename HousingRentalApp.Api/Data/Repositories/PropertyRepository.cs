@@ -21,7 +21,9 @@ namespace HousingRentalApp.Api.Data.Repositories
                     .ThenInclude(pa => pa.Amenity)
                 .Include(p => p.PropertyPhotos)
                 .Include(p => p.Reviews)
-                .Include(p => p.PropertyAvailabilities)
+                .Include(p => p.PropertyAvailabilities) // Для ручных блокировок
+                .Include(p => p.Bookings)               // Для подтверждённых бронирований
+                    .ThenInclude(b => b.Status)
                 .Include(p => p.Views)
                 .FirstOrDefaultAsync(p => p.PropertyId == properyId);
         }

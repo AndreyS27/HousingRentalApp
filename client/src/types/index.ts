@@ -31,6 +31,7 @@ export interface PropertySummary {
   longitude: number | null;
   isActive: boolean;
   viewCount: number;
+  blockedDates?: string[];
 }
 
 export interface SearchParams {

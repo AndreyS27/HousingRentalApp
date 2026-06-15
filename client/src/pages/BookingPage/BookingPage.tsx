@@ -46,6 +46,8 @@ export const BookingPage: React.FC = () => {
     const initialCheckOut = searchParams.get('checkOut');
     const initialGuests = parseInt(searchParams.get('guests') || '1');
 
+    const [blockedDates, setBlockedDates] = useState<string[]>([]);
+
     const [property, setProperty] = useState<PropertyInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -83,6 +85,7 @@ export const BookingPage: React.FC = () => {
                     averageRating: data.averageRating,
                     guestsCount: data.guestsCount,
                 });
+                setBlockedDates(data.blockedDates || []);
             } catch (err) {
                 console.error('Ошибка загрузки объекта:', err);
                 setError('Не удалось загрузить информацию об объекте');
@@ -317,6 +320,13 @@ export const BookingPage: React.FC = () => {
                                             setCheckOutDate(value[1]);
                                         }}
                                         minDate={new Date()}
+                                        locale="ru"
+                                        excludeDate={(date) => {
+                                            // Форматируем дату в строку для сравнения
+                                            const dateStr = dayjs(date).format('YYYY-MM-DD');
+                                            // Блокируем дату, если она есть в списке заблокированных
+                                            return blockedDates.includes(dateStr);
+                                        }}
                                     />
                                 </Stack>
 
