@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Container,
   Grid,
@@ -31,6 +32,7 @@ import { PropertyMap } from '../../components/Map/PropertyMap';
 import { propertiesApi } from '../../api/propertiesApi';
 import { reviewsApi } from '../../api/reviewsApi';
 import { PropertyDetails, Review } from '../../types';
+import { RootState } from '../../store';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import '@mantine/carousel/styles.css';
@@ -42,10 +44,16 @@ export const PropertyDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+
   const [property, setProperty] = useState<PropertyDetails | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Состояние для модального окна авторизации
+  const [authModalOpened, setAuthModalOpened] = useState(false);
 
   // Читаем searchParams из state (при переходе с SearchPage)
   const state = location.state as { searchParams?: any };
@@ -97,7 +105,8 @@ export const PropertyDetailsPage: React.FC = () => {
     fetchData();
   }, [id]);
 
-  const handleBookNow = () => {
+  // Функция для открытия страницы бронирования (только для авторизованных)
+  const proceedToBooking = () => {
     if (!dateRange[0] || !dateRange[1]) {
       notifications.show({
         title: 'Ошибка',
@@ -116,6 +125,17 @@ export const PropertyDetailsPage: React.FC = () => {
     navigate(`/booking?${params.toString()}`);
   };
 
+  // Обработчик нажатия на кнопку "Забронировать"
+  const handleBookNow = () => {
+    if (!isAuthenticated) {
+      // Если пользователь не авторизован, открываем модальное окно
+      setAuthModalOpened(true);
+    } else {
+      // Если авторизован, переходим к бронированию
+      proceedToBooking();
+    }
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -129,6 +149,18 @@ export const PropertyDetailsPage: React.FC = () => {
   const openGallery = (index: number) => {
     setSelectedPhotoIndex(index);
     setGalleryOpened(true);
+  };
+
+  // Функция для открытия страницы логина в новой вкладке
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.open('/login', '_blank');
+  };
+
+  // Функция для открытия страницы регистрации в новой вкладке
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.open('/register', '_blank');
   };
 
   if (loading) {
@@ -284,8 +316,6 @@ export const PropertyDetailsPage: React.FC = () => {
     );
   };
 
-  // --- Модальное окно для просмотра всех фотографий ---
-  // --- Модальное окно для просмотра всех фотографий ---
   // --- Модальное окно для просмотра всех фотографий ---
   const renderGalleryModal = () => {
     if (photos.length === 0) return null;
@@ -473,7 +503,7 @@ export const PropertyDetailsPage: React.FC = () => {
               <Box>
                 <Title order={3} mb="sm">Отзывы ({reviews.length})</Title>
                 {reviews.length === 0 ? (
-                  <Text c="dimmed">Отзывов пока нет. Будьте первым!</Text>
+                  <Text c="dimmed">Отзывов пока нет.</Text>
                 ) : (
                   <Stack gap="md">
                     {reviews.map((review) => (
@@ -506,7 +536,8 @@ export const PropertyDetailsPage: React.FC = () => {
               </Box>
             </Stack>
           </Grid.Col>
-
+          
+          {/* Правая колонка - бронирование */}
           <Grid.Col span={4}>
             <Paper shadow="lg" p="xl" radius="md" withBorder>
               <Stack gap="md">
@@ -547,9 +578,6 @@ export const PropertyDetailsPage: React.FC = () => {
                   Забронировать
                 </Button>
 
-                <Text size="xs" c="dimmed" ta="center">
-                  Вы ничем не платите до подтверждения
-                </Text>
               </Stack>
             </Paper>
 
@@ -559,13 +587,53 @@ export const PropertyDetailsPage: React.FC = () => {
                   properties={[property]}
                   hoveredPropertyId={null}
                   cityCoordinates={cityCoordinates}
-
                 />
               </Paper>
             )}
           </Grid.Col>
         </Grid>
       </Container>
+
+      {/* Модальное окно для неавторизованных пользователей */}
+      <Modal
+        opened={authModalOpened}
+        onClose={() => setAuthModalOpened(false)}
+        title="Требуется авторизация"
+        size="md"
+        centered
+        zIndex={1000}
+      >
+        <Stack gap="lg">
+          <Text ta="center" size="lg">
+            Для продолжения бронирования войдите или зарегистрируйтесь
+          </Text>
+          
+          <Group justify="center" gap="xl">
+            <Button
+              component="a"
+              href="/login"
+              target="_blank"
+              variant="subtle"
+              color="blue"
+              style={{ textDecoration: 'underline' }}
+              onClick={handleLoginClick}
+            >
+              Войдите
+            </Button>
+            <Button
+              component="a"
+              href="/register"
+              target="_blank"
+              variant="subtle"
+              color="blue"
+              style={{ textDecoration: 'underline' }}
+              onClick={handleRegisterClick}
+            >
+              Зарегистрируйтесь
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </>
   );
 };

@@ -291,7 +291,7 @@ export const RenterPanel: React.FC = () => {
                       <Table.Td>{booking.totalPrice.toLocaleString()} ₽</Table.Td>
                       <Table.Td>{getStatusBadge(booking.status)}</Table.Td>
                       <Table.Td>
-                        {booking.status === 'awaiting_confirmation' && (
+                        {booking.status === 'Ожидает подтверждения' && (
                           <Button
                             size="xs"
                             color="red"
