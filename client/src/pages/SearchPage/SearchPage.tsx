@@ -23,6 +23,8 @@ import { PropertySummary, SearchParams } from '../../types';
 import dayjs from 'dayjs';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '../../components/Layout/Header/Header';
+import { YandexMap } from '../../components/Map/YandexMap';
+import { YandexMapV3 } from '../../components/Map/YandexMapV3';
 
 
 export const SearchPage: React.FC = () => {
@@ -254,7 +256,30 @@ export const SearchPage: React.FC = () => {
           {/* Правая колонка — карта */}
           <Grid.Col span={6} style={{ height: '750px' }}>
             {/* <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}> */}
-            <PropertyMap
+            {/* <PropertyMap
+              properties={properties}
+              cityCoordinates={cityCoordinates}
+              hoveredPropertyId={hoveredPropertyId}
+              searchParams={{
+                city,
+                checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
+                checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
+                guestCount: guestsCount || undefined,
+              }}
+            /> */}
+            {/* </Paper> */}
+            {/* <YandexMap
+              properties={properties}
+              cityCoordinates={cityCoordinates}
+              hoveredPropertyId={hoveredPropertyId}
+              searchParams={{
+                city,
+                checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
+                checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
+                guestCount: guestsCount || undefined,
+              }}
+            /> */}
+            <YandexMapV3
               properties={properties}
               cityCoordinates={cityCoordinates}
               hoveredPropertyId={hoveredPropertyId}
@@ -265,7 +290,6 @@ export const SearchPage: React.FC = () => {
                 guestCount: guestsCount || undefined,
               }}
             />
-            {/* </Paper> */}
           </Grid.Col>
         </Grid>
       </div>

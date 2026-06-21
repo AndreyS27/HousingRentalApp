@@ -28,7 +28,6 @@ import { DatePickerInput } from '@mantine/dates';
 import { NumberInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { Header } from '../../components/Layout/Header/Header';
-import { PropertyMap } from '../../components/Map/PropertyMap';
 import { propertiesApi } from '../../api/propertiesApi';
 import { reviewsApi } from '../../api/reviewsApi';
 import { PropertyDetails, Review } from '../../types';
@@ -37,6 +36,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import '@mantine/carousel/styles.css';
 import { Carousel } from '@mantine/carousel';
+import { YandexMapV3 } from '../../components/Map/YandexMapV3';
 
 dayjs.locale('ru');
 
@@ -591,7 +591,7 @@ export const PropertyDetailsPage: React.FC = () => {
 
             {cityCoordinates && (
               <Paper shadow="sm" radius="md" mt="md" style={{ height: 300, overflow: 'hidden' }}>
-                <PropertyMap
+                <YandexMapV3
                   properties={[property]}
                   hoveredPropertyId={null}
                   cityCoordinates={cityCoordinates}
