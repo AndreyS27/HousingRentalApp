@@ -94,7 +94,10 @@ namespace HousingRentalApp.Api
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000")
+                    policy.WithOrigins(
+                        "http://localhost:3000",
+                        "https://housing-rental-egsnt0az1-andreys27s-projects.vercel.app",
+                        "https://housing-rental-app.vercel.app")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
