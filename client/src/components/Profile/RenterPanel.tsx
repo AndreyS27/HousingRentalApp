@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -70,11 +70,7 @@ export const RenterPanel: React.FC = () => {
   const [deletingReview, setDeletingReview] = useState<Review | null>(null);
   const [submittingDelete, setSubmittingDelete] = useState(false);
 
-  useEffect(() => {
-    fetchRenterData();
-  }, []);
-
-  const fetchRenterData = async () => {
+  const fetchRenterData = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     setError(null);
@@ -93,7 +89,11 @@ export const RenterPanel: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchRenterData();
+  }, [fetchRenterData]);
 
   const handleCancelBooking = async (bookingId: number) => {
     if (!window.confirm('Вы уверены, что хотите отменить бронирование?')) return;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Container, Paper, Title, Text, Button, Stack, ThemeIcon } from '@mantine/core';
-import { IconCheck, IconCalendar, IconHome } from '@tabler/icons-react';
+import { IconCheck, IconHome } from '@tabler/icons-react';
 import { Header } from '../../components/Layout/Header/Header';
 
 export const BookingSuccessPage: React.FC = () => {

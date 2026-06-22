@@ -7,8 +7,7 @@ import {
   YMapDefaultMarker,
 } from 'ymap3-components';
 import { PropertySummary } from '../../types';
-import { Loader, Center, Paper, Image, Text, Group } from '@mantine/core';
-import { IconBed, IconUsers, IconMapPin } from '@tabler/icons-react';
+import { Loader, Center, Paper} from '@mantine/core';
 
 interface YandexMapV3Props {
   properties: PropertySummary[];

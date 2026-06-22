@@ -65,7 +65,6 @@ export const EditPropertyPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     // Данные из API
-    const [property, setProperty] = useState<any>(null);
     const [amenities, setAmenities] = useState<Amenity[]>([]);
     const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
     const [existingPhotos, setExistingPhotos] = useState<Photo[]>([]);
@@ -101,7 +100,6 @@ export const EditPropertyPage: React.FC = () => {
                 ]);
 
                 const propertyData = propertyRes.data;
-                setProperty(propertyData);
                 setTitle(propertyData.title);
                 setDescription(propertyData.description || '');
                 setAddress(propertyData.address);
@@ -113,11 +111,6 @@ export const EditPropertyPage: React.FC = () => {
                 setBathroomsCount(propertyData.bathroomsCount);
                 setPricePerNight(propertyData.pricePerNight);
                 setIsActive(propertyData.isActive);
-                // setExistingPhotos(propertyData.photos?.map((url: string, index: number) => ({
-                //     photoId: index,
-                //     photoUrl: url,
-                //     isMain: index === 0,
-                // })) || []);
                 setExistingPhotos(propertyData.photos || []);
 
                 setAmenities(amenitiesRes.data);
@@ -171,9 +164,6 @@ export const EditPropertyPage: React.FC = () => {
     };
 
     const handleSetMainPhoto = async (photoId: number) => {
-        // Находим фотографию
-        // const photo = existingPhotos.find(p => p.photoUrl === photoUrl);
-        // if (!photo) return;
 
         try {
             // Отправляем запрос на бэкенд

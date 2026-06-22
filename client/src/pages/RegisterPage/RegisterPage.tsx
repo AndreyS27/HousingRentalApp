@@ -13,7 +13,7 @@ import {
   Group,
   Alert,
 } from '@mantine/core';
-import { IconMail, IconLock, IconUser, IconUserCircle, IconArrowLeft } from '@tabler/icons-react';
+import { IconMail, IconLock, IconUserCircle, IconArrowLeft } from '@tabler/icons-react';
 import { useDispatch } from 'react-redux';
 import { authApi } from '../../api/authApi';
 import { setCredentials } from '../../store/slices/authSlice';

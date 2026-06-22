@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, NumberInput, Button, Group, Stack, Checkbox, Divider, Select, RangeSlider, Text, Box } from '@mantine/core';
+import { Modal, NumberInput, Button, Group, Stack, Checkbox, Divider, RangeSlider, Text, Box } from '@mantine/core';
 import { propertyTypesApi } from '../../api/propertyTypesApi';
 import { PropertyType } from '../../types';
 
@@ -55,20 +55,14 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
   onReset,
 }) => {
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
-  const [loadingTypes, setLoadingTypes] = useState(false);
-  const [selectKey, setSelectKey] = useState(0); // Добавлено
-
+  
   useEffect(() => {
     const fetchPropertyTypes = async () => {
-      setLoadingTypes(true);
       try {
         const response = await propertyTypesApi.getAll();
         setPropertyTypes(response.data);
-        setSelectKey(prev => prev + 1); // Принудительно обновляем Select после загрузки
       } catch (err) {
         console.error('Ошибка загрузки типов объектов:', err);
-      } finally {
-        setLoadingTypes(false);
       }
     };
     fetchPropertyTypes();

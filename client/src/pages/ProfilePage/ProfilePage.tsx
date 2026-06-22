@@ -3,12 +3,10 @@ import { useSelector } from 'react-redux';
 import {
   Container,
   Paper,
-  Title,
   Text,
   Stack,
   Avatar,
   Group,
-  Divider,
   Grid,
   Tabs,
 } from '@mantine/core';

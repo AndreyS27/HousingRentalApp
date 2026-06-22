@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,7 +14,7 @@ import {
   Alert,
   Modal,
 } from '@mantine/core';
-import { IconHome, IconCalendar, IconCurrencyRubel, IconMessageCircle, IconEdit, IconTrash, IconCheck, IconX } from '@tabler/icons-react';
+import { IconHome, IconCalendar, IconMessageCircle, IconEdit, IconTrash, IconCheck, IconX } from '@tabler/icons-react';
 import { RootState } from '../../store';
 import { propertiesApi } from '../../api/propertiesApi';
 import { bookingsApi } from '../../api/bookingsApi';
@@ -73,11 +73,7 @@ export const LandlordPanel: React.FC = () => {
   const [activeBookings, setActiveBookings] = useState<BookingRequest[]>([]);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
 
-  useEffect(() => {
-    fetchLandlordData();
-  }, []);
-
-  const fetchLandlordData = async () => {
+  const fetchLandlordData = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     setError(null);
@@ -110,7 +106,11 @@ export const LandlordPanel: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+    useEffect(() => {
+    fetchLandlordData();
+  }, [fetchLandlordData]);
 
   const handleDeleteProperty = async () => {
     if (!selectedProperty) return;

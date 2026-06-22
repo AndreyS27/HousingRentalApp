@@ -19,7 +19,7 @@ import {
     SimpleGrid,
     Card,
 } from '@mantine/core';
-import { IconArrowLeft, IconCreditCard, IconLock, IconCalendar, IconUsers } from '@tabler/icons-react';
+import { IconArrowLeft, IconCreditCard, IconLock} from '@tabler/icons-react';
 import { Header } from '../../components/Layout/Header/Header';
 import { propertiesApi } from '../../api/propertiesApi';
 import { bookingsApi } from '../../api/bookingsApi';

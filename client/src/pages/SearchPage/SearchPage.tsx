@@ -15,21 +15,18 @@ import {
 import { IconSearch, IconFilter, IconCalendar, IconUsers } from '@tabler/icons-react';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
 import { PropertyCard } from '../../components/PropertyCard/PropertyCard';
-import { PropertyMap } from '../../components/Map/PropertyMap';
 import { FiltersModal } from '../../components/FiltersModal/FiltersModal';
 import { propertiesApi } from '../../api/propertiesApi';
 import { geocodeCity } from '../../api/geocodingApi';
 import { PropertySummary, SearchParams } from '../../types';
 import dayjs from 'dayjs';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Header } from '../../components/Layout/Header/Header';
-import { YandexMap } from '../../components/Map/YandexMap';
 import { YandexMapV3 } from '../../components/Map/YandexMapV3';
 
 
 export const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const initialCity = searchParams.get('city') || 'Москва';
   const initialCheckIn = searchParams.get('checkIn');
@@ -64,7 +61,7 @@ export const SearchPage: React.FC = () => {
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
 
-  const performSearch = useCallback(async (page: number = currentPage) => {
+  const performSearch = useCallback(async (page: number) => {
     if (!city.trim()) return;
 
     setLoading(true);
@@ -102,7 +99,8 @@ export const SearchPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, selectedAmenities, minPrice, maxPrice, propertyTypeId]);
+  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, 
+    selectedAmenities, minPrice, maxPrice, propertyTypeId]);
 
   // Обёртка для поиска без параметра страницы (использует текущую страницу)
   const handleSearch = useCallback(() => {
@@ -116,11 +114,11 @@ export const SearchPage: React.FC = () => {
   };
 
   useEffect(() => {
-    performSearch();
-  }, []);
+    performSearch(1);
+  }, [performSearch]);
 
   const handleApplyFilters = () => {
-    performSearch();
+    performSearch(1);
     setFiltersOpened(false);
   };
 
@@ -131,7 +129,6 @@ export const SearchPage: React.FC = () => {
     setMinPrice(null);
     setMaxPrice(null);
     setPropertyTypeId(null);
-    performSearch();
     setCurrentPage(1);
     performSearch(1);
   };
@@ -255,30 +252,6 @@ export const SearchPage: React.FC = () => {
 
           {/* Правая колонка — карта */}
           <Grid.Col span={6} style={{ height: '750px' }}>
-            {/* <Paper shadow="sm" p="sm" radius="md" style={{ height: '100%' }}> */}
-            {/* <PropertyMap
-              properties={properties}
-              cityCoordinates={cityCoordinates}
-              hoveredPropertyId={hoveredPropertyId}
-              searchParams={{
-                city,
-                checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
-                checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
-                guestCount: guestsCount || undefined,
-              }}
-            /> */}
-            {/* </Paper> */}
-            {/* <YandexMap
-              properties={properties}
-              cityCoordinates={cityCoordinates}
-              hoveredPropertyId={hoveredPropertyId}
-              searchParams={{
-                city,
-                checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
-                checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
-                guestCount: guestsCount || undefined,
-              }}
-            /> */}
             <YandexMapV3
               properties={properties}
               cityCoordinates={cityCoordinates}

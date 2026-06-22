@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -9,10 +9,9 @@ import {
   Text,
   Menu,
   Avatar,
-  Box,
   Stack
 } from '@mantine/core';
-import { IconUser, IconLogout, IconDashboard, IconChevronDown } from '@tabler/icons-react';
+import { IconLogout, IconDashboard, IconChevronDown } from '@tabler/icons-react';
 import { RootState } from '../../../store';
 import { logout } from '../../../store/slices/authSlice';
 
