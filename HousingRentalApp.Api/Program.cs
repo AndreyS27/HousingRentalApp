@@ -129,6 +129,7 @@ namespace HousingRentalApp.Api
                 app.MapControllers();
                 app.UseStaticFiles();
 
+                Console.WriteLine("=== Application configured, starting run ===");
                 app.Run();
             }
             catch (Exception ex)
