@@ -15,6 +15,7 @@ namespace HousingRentalApp.Api
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Configuration.AddEnvironmentVariables();
+            //builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -98,8 +99,8 @@ namespace HousingRentalApp.Api
                 {
                     policy.WithOrigins(
                         "http://localhost:3000",
-                        "https://housing-rental-egsnt0az1-andreys27s-projects.vercel.app",
-                        "https://housing-rental-app.vercel.app")
+                        "https://housing-rental-app.vercel.app",
+                        "https://housing-rental-aszuijnk3-andreys27s-projects.vercel.app/")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();

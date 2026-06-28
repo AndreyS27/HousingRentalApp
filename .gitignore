@@ -508,3 +508,6 @@ yarn-debug.log*
 yarn-error.log*
 
 HousingRentalApp.Api/wwwroot/
+launchSettings.json
+HousingRentalApp.Api\Properties\launchSettings.json
+/HousingRentalApp.Api/Properties/launchSettings.json
