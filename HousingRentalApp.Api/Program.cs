@@ -121,7 +121,7 @@ namespace HousingRentalApp.Api
                 }
 
                 app.UseCors("AllowReactApp");
-                app.UseHttpsRedirection();
+                //app.UseHttpsRedirection();
 
                 app.UseAuthentication();
                 app.UseAuthorization();
