@@ -13,41 +13,51 @@ namespace HousingRentalApp.Api
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ?? throw new Exception("Connection string is not defined")));
-
-            builder.WebHost.UseUrls(Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "http://localhost:5000");
-        
-            //builder.Configuration.AddEnvironmentVariables();
-
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            var app = builder.Build();
-
-            var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-            lifetime.ApplicationStopping.Register(() =>
+            try
             {
-                Console.WriteLine("=== ApplicationStopping triggered ===");
-            });
-            lifetime.ApplicationStopped.Register(() =>
+                var builder = WebApplication.CreateBuilder(args);
+
+                //builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                //    options.UseNpgsql(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ?? throw new Exception("Connection string is not defined")));
+
+                builder.WebHost.UseUrls(Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "http://localhost:5000");
+
+                //builder.Configuration.AddEnvironmentVariables();
+
+                builder.Services.AddControllers();
+                builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddSwaggerGen();
+
+                var app = builder.Build();
+
+                var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+                lifetime.ApplicationStopping.Register(() =>
+                {
+                    Console.WriteLine("=== ApplicationStopping triggered ===");
+                });
+                lifetime.ApplicationStopped.Register(() =>
+                {
+                    Console.WriteLine("=== ApplicationStopped triggered ===");
+                });
+
+
+                app.UseStaticFiles();
+
+                app.UseSwagger();
+                app.UseSwaggerUI();
+
+                app.MapControllers();
+
+                Console.WriteLine("=== Starting minimal app v6 ===");
+                app.Run();
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine("=== ApplicationStopped triggered ===");
-            });
+                Console.WriteLine("=== FATAL ERROR in app.Run ===");
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
 
-
-            app.UseStaticFiles();
-
-            app.UseSwagger();
-            app.UseSwaggerUI();
-
-            app.MapControllers();
-
-            Console.WriteLine("=== Starting minimal app v5 ===");
-            app.Run();
             //try
             //{
             //    var builder = WebApplication.CreateBuilder(args);
