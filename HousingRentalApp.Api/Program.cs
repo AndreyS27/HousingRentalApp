@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Microsoft.Extensions.Hosting;
 namespace HousingRentalApp.Api
 {
     public class Program
@@ -27,6 +28,17 @@ namespace HousingRentalApp.Api
 
             var app = builder.Build();
 
+            var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+            lifetime.ApplicationStopping.Register(() =>
+            {
+                Console.WriteLine("=== ApplicationStopping triggered ===");
+            });
+            lifetime.ApplicationStopped.Register(() =>
+            {
+                Console.WriteLine("=== ApplicationStopped triggered ===");
+            });
+
+
             app.UseStaticFiles();
 
             app.UseSwagger();
@@ -34,7 +46,7 @@ namespace HousingRentalApp.Api
 
             app.MapControllers();
 
-            Console.WriteLine("=== Starting minimal app v4 ===");
+            Console.WriteLine("=== Starting minimal app v5 ===");
             app.Run();
             //try
             //{
