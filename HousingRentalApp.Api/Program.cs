@@ -13,24 +13,28 @@ namespace HousingRentalApp.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.WebHost.UseUrls("http://0.0.0.0:5000");
-            builder.WebHost.UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
-            builder.Configuration.AddEnvironmentVariables();
 
-            builder.Services.AddHealthChecks();
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ?? throw new Exception("Connection string is not defined")));
+
+            builder.WebHost.UseUrls(Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "http://localhost:5000");
+        
+            //builder.Configuration.AddEnvironmentVariables();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
+            app.UseStaticFiles();
+
             app.UseSwagger();
             app.UseSwaggerUI();
 
             app.MapControllers();
-            app.MapHealthChecks("/health");
 
-            Console.WriteLine("=== Starting minimal app v3 ===");
+            Console.WriteLine("=== Starting minimal app v4 ===");
             app.Run();
             //try
             //{
