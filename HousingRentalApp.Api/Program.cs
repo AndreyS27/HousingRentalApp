@@ -12,132 +12,148 @@ namespace HousingRentalApp.Api
     {
         public static void Main(string[] args)
         {
-            try
-            {
-                var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddEnvironmentVariables();
 
-                builder.Configuration.AddEnvironmentVariables();
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
-                // временные логи:
-                Console.WriteLine("=== APPLICATION STARTING ===");
-                Console.WriteLine($"Connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
+            var app = builder.Build();
 
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-                builder.Services.AddScoped<IUserRepository, UserRepository>();
-                builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
-                builder.Services.AddScoped<IAuthService, AuthService>();
-                builder.Services.AddScoped<IPropertyService, PropertyService>();
-                builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-                builder.Services.AddScoped<IBookingRepository, BookingRepository>();
-                builder.Services.AddScoped<IBookingService, BookingService>();
-                builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-                builder.Services.AddScoped<IReviewService, ReviewService>();
-                builder.Services.AddScoped<IPaymentService, PaymentService>();
-                builder.Services.AddScoped<IPropertyViewRepository, PropertyViewRepository>();
+            app.MapControllers();
 
-                // Настройка JWT аутентификации
-                var jwtSecret = builder.Configuration["JwtSettings:Secret"];
-                var key = Encoding.ASCII.GetBytes(jwtSecret);
+            Console.WriteLine("=== Starting minimal app ===");
+            app.Run();
+            //try
+            //{
+            //    var builder = WebApplication.CreateBuilder(args);
 
-                builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.RequireHttpsMetadata = false; // поменять в продакшене
-                    options.SaveToken = true;
+            //    builder.Configuration.AddEnvironmentVariables();
 
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = true,
-                        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            //    // временные логи:
+            //    Console.WriteLine("=== APPLICATION STARTING ===");
+            //    Console.WriteLine($"Connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
 
-                        ValidateAudience = true,
-                        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            //    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            //        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
+            //    builder.Services.AddScoped<IUserRepository, UserRepository>();
+            //    builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+            //    builder.Services.AddScoped<IAuthService, AuthService>();
+            //    builder.Services.AddScoped<IPropertyService, PropertyService>();
+            //    builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+            //    builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+            //    builder.Services.AddScoped<IBookingService, BookingService>();
+            //    builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            //    builder.Services.AddScoped<IReviewService, ReviewService>();
+            //    builder.Services.AddScoped<IPaymentService, PaymentService>();
+            //    builder.Services.AddScoped<IPropertyViewRepository, PropertyViewRepository>();
 
-                builder.Services.AddAuthorization();
-                builder.Services.AddControllers();
-                builder.Services.AddEndpointsApiExplorer();
+            //    // Настройка JWT аутентификации
+            //    var jwtSecret = builder.Configuration["JwtSettings:Secret"];
+            //    var key = Encoding.ASCII.GetBytes(jwtSecret);
 
-                builder.Services.AddSwaggerGen(c =>
-                {
-                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                    {
-                        Name = "Authorization",
-                        Type = SecuritySchemeType.ApiKey,
-                        Scheme = "Bearer",
-                        BearerFormat = "JWT",
-                        In = ParameterLocation.Header,
-                        Description = "Enter 'Bearer [token]'"
-                    });
-                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-                });
-                });
+            //    builder.Services.AddAuthentication(options =>
+            //    {
+            //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    })
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.RequireHttpsMetadata = false; // поменять в продакшене
+            //        options.SaveToken = true;
 
-                // CORS
-                builder.Services.AddCors(options =>
-                {
-                    options.AddPolicy("AllowReactApp", policy =>
-                    {
-                        policy.WithOrigins(
-                            "http://localhost:3000",
-                            "https://housing-rental-app.vercel.app",
-                            "https://housing-rental-aszuijnk3-andreys27s-projects.vercel.app/")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                    });
-                });
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuerSigningKey = true,
+            //            IssuerSigningKey = new SymmetricSecurityKey(key),
+            //            ValidateIssuer = true,
+            //            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
 
-                var app = builder.Build();
+            //            ValidateAudience = true,
+            //            ValidAudience = builder.Configuration["JwtSettings:Audience"],
 
-                if (app.Environment.IsDevelopment())
-                {
-                    app.UseSwagger();
-                    app.UseSwaggerUI();
-                }
+            //            ValidateLifetime = true,
+            //            ClockSkew = TimeSpan.Zero
+            //        };
+            //    });
 
-                app.UseCors("AllowReactApp");
-                //app.UseHttpsRedirection();
+            //    builder.Services.AddAuthorization();
+            //    builder.Services.AddControllers();
+            //    builder.Services.AddEndpointsApiExplorer();
 
-                app.UseAuthentication();
-                app.UseAuthorization();
+            //    builder.Services.AddSwaggerGen(c =>
+            //    {
+            //        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            //        {
+            //            Name = "Authorization",
+            //            Type = SecuritySchemeType.ApiKey,
+            //            Scheme = "Bearer",
+            //            BearerFormat = "JWT",
+            //            In = ParameterLocation.Header,
+            //            Description = "Enter 'Bearer [token]'"
+            //        });
+            //        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            //    {
+            //        {
+            //            new OpenApiSecurityScheme
+            //            {
+            //                Reference = new OpenApiReference
+            //                {
+            //                    Type = ReferenceType.SecurityScheme,
+            //                    Id = "Bearer"
+            //                }
+            //            },
+            //            new string[] {}
+            //        }
+            //    });
+            //    });
 
-                app.MapControllers();
-                app.UseStaticFiles();
+            //    // CORS
+            //    builder.Services.AddCors(options =>
+            //    {
+            //        options.AddPolicy("AllowReactApp", policy =>
+            //        {
+            //            policy.WithOrigins(
+            //                "http://localhost:3000",
+            //                "https://housing-rental-app.vercel.app",
+            //                "https://housing-rental-aszuijnk3-andreys27s-projects.vercel.app/")
+            //                .AllowAnyHeader()
+            //                .AllowAnyMethod()
+            //                .AllowCredentials();
+            //        });
+            //    });
 
-                Console.WriteLine("=== Application configured, starting run ===");
-                app.Run();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"FATAL ERROR: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
-                throw;
-            }
+            //    var app = builder.Build();
+
+            //    if (app.Environment.IsDevelopment())
+            //    {
+            //        app.UseSwagger();
+            //        app.UseSwaggerUI();
+            //    }
+
+            //    app.UseCors("AllowReactApp");
+            //    //app.UseHttpsRedirection();
+
+            //    app.UseAuthentication();
+            //    app.UseAuthorization();
+
+            //    app.MapControllers();
+            //    app.UseStaticFiles();
+
+            //    Console.WriteLine("=== Application configured, starting run ===");
+            //    app.Run();
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"FATAL ERROR: {ex.Message}");
+            //    Console.WriteLine(ex.StackTrace);
+            //    throw;
+            //}
         }
     }
 }
