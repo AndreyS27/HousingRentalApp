@@ -30,6 +30,11 @@ namespace HousingRentalApp.Api
 
             Console.WriteLine("=== Starting minimal app ===");
             app.Run();
+            // Временный костыль, чтобы приложение не завершалось
+            while (true)
+            {
+                Thread.Sleep(10000);
+            }
             //try
             //{
             //    var builder = WebApplication.CreateBuilder(args);
