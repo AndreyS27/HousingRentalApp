@@ -15,6 +15,7 @@ namespace HousingRentalApp.Api
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.AddEnvironmentVariables();
 
+            builder.Services.AddHealthChecks();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -25,6 +26,7 @@ namespace HousingRentalApp.Api
             app.UseSwaggerUI();
 
             app.MapControllers();
+            app.MapHealthChecks("/health");
 
             Console.WriteLine("=== Starting minimal app ===");
             app.Run();
