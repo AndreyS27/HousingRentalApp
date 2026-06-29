@@ -13,6 +13,8 @@ namespace HousingRentalApp.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.WebHost.UseUrls("http://0.0.0.0:5000");
+            builder.WebHost.UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
             builder.Configuration.AddEnvironmentVariables();
 
             builder.Services.AddHealthChecks();
@@ -28,13 +30,8 @@ namespace HousingRentalApp.Api
             app.MapControllers();
             app.MapHealthChecks("/health");
 
-            Console.WriteLine("=== Starting minimal app v2 ===");
+            Console.WriteLine("=== Starting minimal app v3 ===");
             app.Run();
-            // Временный костыль, чтобы приложение не завершалось
-            while (true)
-            {
-                Thread.Sleep(10000);
-            }
             //try
             //{
             //    var builder = WebApplication.CreateBuilder(args);
