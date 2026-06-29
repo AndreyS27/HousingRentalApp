@@ -28,7 +28,7 @@ namespace HousingRentalApp.Api
             app.MapControllers();
             app.MapHealthChecks("/health");
 
-            Console.WriteLine("=== Starting minimal app ===");
+            Console.WriteLine("=== Starting minimal app v2 ===");
             app.Run();
             // Временный костыль, чтобы приложение не завершалось
             while (true)
