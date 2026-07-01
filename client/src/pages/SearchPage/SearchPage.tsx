@@ -61,7 +61,7 @@ export const SearchPage: React.FC = () => {
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
 
-  const performSearch = useCallback(async (page: number = currentPage) => {
+  const performSearch = useCallback(async (page: number) => {
     if (!city.trim()) return;
 
     setLoading(true);
@@ -113,11 +113,13 @@ export const SearchPage: React.FC = () => {
   };
 
   useEffect(() => {
-    performSearch();
+    performSearch(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleApplyFilters = () => {
-    performSearch();
+    setCurrentPage(1);
+    performSearch(1);
     setFiltersOpened(false);
   };
 
