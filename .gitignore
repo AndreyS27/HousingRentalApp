@@ -511,3 +511,4 @@ yarn-error.log*
 launchSettings.json
 HousingRentalApp.Api\Properties\launchSettings.json
 /HousingRentalApp.Api/Properties/launchSettings.json
+client\build
