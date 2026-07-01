@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Grid,
   TextInput,
@@ -61,7 +61,7 @@ export const SearchPage: React.FC = () => {
   const [cityCoordinates, setCityCoordinates] = useState<[number, number] | null>(null);
   const [hoveredPropertyId, setHoveredPropertyId] = useState<number | null>(null);
 
-  const performSearch = useCallback(async (page: number) => {
+  const performSearch = useCallback(async (page: number = currentPage) => {
     if (!city.trim()) return;
 
     setLoading(true);
@@ -99,8 +99,7 @@ export const SearchPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, 
-    selectedAmenities, minPrice, maxPrice, propertyTypeId]);
+  }, [city, dateRange, guestsCount, bedroomsCount, bedsCount, selectedAmenities, minPrice, maxPrice, propertyTypeId]);
 
   // Обёртка для поиска без параметра страницы (использует текущую страницу)
   const handleSearch = useCallback(() => {
@@ -114,11 +113,11 @@ export const SearchPage: React.FC = () => {
   };
 
   useEffect(() => {
-    performSearch(1);
-  }, [performSearch]);
+    performSearch();
+  }, []);
 
   const handleApplyFilters = () => {
-    performSearch(1);
+    performSearch();
     setFiltersOpened(false);
   };
 
@@ -133,7 +132,22 @@ export const SearchPage: React.FC = () => {
     performSearch(1);
   };
 
+  // Мемоизируем параметры поиска, чтобы ссылка на объект не менялась при каждом ререндере
+  const searchParamsMemo = useMemo(() => ({
+    city,
+    checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
+    checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
+    guestCount: guestsCount || undefined,
+  }), [city, dateRange, guestsCount]);
 
+  // Мемоизируем обработчики наведения
+  const handleMouseEnter = useCallback((propertyId: number) => {
+    setHoveredPropertyId(propertyId);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredPropertyId(null);
+  }, []);
 
   return (
     <Stack gap={0} style={{ height: '100vh' }}>
@@ -219,14 +233,9 @@ export const SearchPage: React.FC = () => {
                         <PropertyCard
                           key={property.propertyId}
                           property={property}
-                          onMouseEnter={() => setHoveredPropertyId(property.propertyId)}
-                          onMouseLeave={() => setHoveredPropertyId(null)}
-                          searchParams={{
-                            city,
-                            checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
-                            checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
-                            guestCount: guestsCount || undefined,
-                          }}
+                          onMouseEnter={() => handleMouseEnter(property.propertyId)}
+                          onMouseLeave={handleMouseLeave}
+                          searchParams={searchParamsMemo}
                         />
                       </Grid.Col>
                     ))}
@@ -256,12 +265,7 @@ export const SearchPage: React.FC = () => {
               properties={properties}
               cityCoordinates={cityCoordinates}
               hoveredPropertyId={hoveredPropertyId}
-              searchParams={{
-                city,
-                checkInDate: dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined,
-                checkOutDate: dateRange[1] ? dayjs(dateRange[1]).format('YYYY-MM-DD') : undefined,
-                guestCount: guestsCount || undefined,
-              }}
+              searchParams={searchParamsMemo}
             />
           </Grid.Col>
         </Grid>
@@ -287,4 +291,4 @@ export const SearchPage: React.FC = () => {
       />
     </Stack>
   );
-};
+}
