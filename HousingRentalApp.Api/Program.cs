@@ -13,51 +13,6 @@ namespace HousingRentalApp.Api
     {
         public static void Main(string[] args)
         {
-            //try
-            //{
-            //    var builder = WebApplication.CreateBuilder(args);
-
-            //    //builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            //    //    options.UseNpgsql(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ?? throw new Exception("Connection string is not defined")));
-
-            //    builder.WebHost.UseUrls(Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "http://localhost:5000");
-
-            //    //builder.Configuration.AddEnvironmentVariables();
-
-            //    builder.Services.AddControllers();
-            //    builder.Services.AddEndpointsApiExplorer();
-            //    builder.Services.AddSwaggerGen();
-
-            //    var app = builder.Build();
-
-            //    var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-            //    lifetime.ApplicationStopping.Register(() =>
-            //    {
-            //        Console.WriteLine("=== ApplicationStopping triggered ===");
-            //    });
-            //    lifetime.ApplicationStopped.Register(() =>
-            //    {
-            //        Console.WriteLine("=== ApplicationStopped triggered ===");
-            //    });
-
-
-            //    app.UseStaticFiles();
-
-            //    app.UseSwagger();
-            //    app.UseSwaggerUI();
-
-            //    app.MapControllers();
-
-            //    Console.WriteLine("=== Starting minimal app v6 ===");
-            //    app.Run();
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("=== FATAL ERROR in app.Run ===");
-            //    Console.WriteLine(ex.ToString());
-            //    throw;
-            //}
-
             try
             {
                 var builder = WebApplication.CreateBuilder(args);
@@ -67,6 +22,11 @@ namespace HousingRentalApp.Api
                 // временные логи:
                 Console.WriteLine("=== APPLICATION STARTING ===");
                 Console.WriteLine($"Connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
+                Console.WriteLine("=== JWT Settings ===");
+                Console.WriteLine($"Secret: {builder.Configuration["JwtSettings:Secret"]}");
+                Console.WriteLine($"Issuer: {builder.Configuration["JwtSettings:Issuer"]}");
+                Console.WriteLine($"Audience: {builder.Configuration["JwtSettings:Audience"]}");
+                Console.WriteLine($"ExpirationHours: {builder.Configuration["JwtSettings:ExpirationHours"]}");
 
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -151,7 +111,7 @@ namespace HousingRentalApp.Api
                         policy.WithOrigins(
                             "http://localhost:3000",
                             "https://housing-rental-app.vercel.app",
-                            "https://housing-rental-aszuijnk3-andreys27s-projects.vercel.app/")
+                            "https://housing-rental-aszuijnk3-andreys27s-projects.vercel.app")
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();
@@ -175,7 +135,7 @@ namespace HousingRentalApp.Api
                 app.MapControllers();
                 app.UseStaticFiles();
 
-                Console.WriteLine("=== Application configured, starting run v7 ===");
+                Console.WriteLine("=== Application configured, starting run v8 ===");
                 app.Run();
             }
             catch (Exception ex)
