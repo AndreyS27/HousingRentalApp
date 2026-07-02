@@ -112,7 +112,7 @@ namespace HousingRentalApp.Api
                             "http://localhost:3000",
                             "https://housing-rental-app.vercel.app",
                             "https://housing-rental-aszuijnk3-andreys27s-projects.vercel.app",
-                            "https://andreys27-housingrentalapp-aaeb.twc1.net/")
+                            "https://andreys27-housingrentalapp-aaeb.twc1.net")
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();
