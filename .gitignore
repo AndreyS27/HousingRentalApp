@@ -513,3 +513,4 @@ HousingRentalApp.Api\Properties\launchSettings.json
 /HousingRentalApp.Api/Properties/launchSettings.json
 client\build
 client/build
+/HousingRentalApp.Api/appsettings.Development.json

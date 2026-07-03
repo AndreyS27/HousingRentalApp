@@ -1,12 +1,13 @@
+using Amazon.S3;
 using HousingRentalApp.Api.Data;
 using HousingRentalApp.Api.Data.Repositories;
+using HousingRentalApp.Api.Models;
 using HousingRentalApp.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Microsoft.Extensions.Hosting;
 namespace HousingRentalApp.Api
 {
     public class Program
@@ -18,15 +19,6 @@ namespace HousingRentalApp.Api
                 var builder = WebApplication.CreateBuilder(args);
 
                 builder.Configuration.AddEnvironmentVariables();
-
-                // временные логи:
-                Console.WriteLine("=== APPLICATION STARTING ===");
-                Console.WriteLine($"Connection string: {builder.Configuration.GetConnectionString("DefaultConnection")}");
-                Console.WriteLine("=== JWT Settings ===");
-                Console.WriteLine($"Secret: {builder.Configuration["JwtSettings:Secret"]}");
-                Console.WriteLine($"Issuer: {builder.Configuration["JwtSettings:Issuer"]}");
-                Console.WriteLine($"Audience: {builder.Configuration["JwtSettings:Audience"]}");
-                Console.WriteLine($"ExpirationHours: {builder.Configuration["JwtSettings:ExpirationHours"]}");
 
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -119,6 +111,20 @@ namespace HousingRentalApp.Api
                     });
                 });
 
+                // Добавление S3 клиента
+                var s3Settings = builder.Configuration.GetSection("S3Settings").Get<S3Settings>();
+                builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(
+                    s3Settings.AccessKey,
+                    s3Settings.SecretKey,
+                    new AmazonS3Config
+                    {
+                        ServiceURL = s3Settings.ServiceURL,
+                        ForcePathStyle = true
+                    }
+                ));
+
+                builder.Services.AddScoped<IS3Service, S3Service>();
+
                 var app = builder.Build();
 
                 if (app.Environment.IsDevelopment())
@@ -136,7 +142,7 @@ namespace HousingRentalApp.Api
                 app.MapControllers();
                 app.UseStaticFiles();
 
-                Console.WriteLine("=== Application configured, starting run v8 ===");
+                Console.WriteLine("=== Application configured, starting run v9 ===");
                 app.Run();
             }
             catch (Exception ex)

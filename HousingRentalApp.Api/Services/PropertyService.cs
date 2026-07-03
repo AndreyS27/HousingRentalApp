@@ -10,20 +10,20 @@ namespace HousingRentalApp.Api.Services
     public class PropertyService : IPropertyService
     {
         private readonly IPropertyRepository _propertyRepository;
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ApplicationDbContext _context;
         private readonly IPropertyViewRepository _propertyViewRepository;
+        private readonly IS3Service _s3Service;
 
         public PropertyService(
             IPropertyRepository propertyRepository, 
-            IWebHostEnvironment webHostEnvironment, 
             ApplicationDbContext context,
-            IPropertyViewRepository propertyViewRepository)
+            IPropertyViewRepository propertyViewRepository,
+            IS3Service s3Service)
         {
             _propertyRepository = propertyRepository;
-            _webHostEnvironment = webHostEnvironment;
             _context = context;
             _propertyViewRepository = propertyViewRepository;
+            _s3Service = s3Service;
         }
 
         public async Task<PropertyResponse?> GetPropertyByIdAsync(int propertyId)
@@ -219,8 +219,6 @@ namespace HousingRentalApp.Api.Services
             // Удаляем фотографии
             if (request.PhotosToDeleteIds != null && request.PhotosToDeleteIds.Any())
             {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
-
                 foreach (var photoId in request.PhotosToDeleteIds)
                 {
                     // Находим запись в БД
@@ -228,14 +226,7 @@ namespace HousingRentalApp.Api.Services
                         .FirstOrDefaultAsync(p => p.PhotoId == photoId && p.PropertyId == propertyId);
                     if (photo != null)
                     {
-                        var uri = new Uri(photo.PhotoUrl);
-                        var fileName = Path.GetFileName(uri.LocalPath);
-                        var filePath = Path.Combine(uploadsFolder, fileName);
-
-                        if (File.Exists(filePath))
-                        {
-                            File.Delete(filePath);
-                        }
+                        await _s3Service.DeletePropertyPhotoAsync(photo.PhotoUrl);
 
                         // Удаляем запись из БД
                         _context.PropertyPhotos.Remove(photo);
@@ -256,24 +247,15 @@ namespace HousingRentalApp.Api.Services
             if (property == null)
                 return false;
 
-            // Удаление физических файлов фотографий с сервера
+            // Удаление физических файлов фотографий с S3 хранилища
 
             if (property.PropertyPhotos != null && property.PropertyPhotos.Any())
             {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
-
                 foreach (var photo in property.PropertyPhotos)
                 {
                     if (!string.IsNullOrEmpty(photo.PhotoUrl))
                     {
-                        var uri = new Uri(photo.PhotoUrl);
-                        var fileName = Path.GetFileName(uri.LocalPath);
-                        var filePath = Path.Combine(uploadsFolder, fileName);
-
-                        if (File.Exists(filePath))
-                        {
-                            File.Delete(filePath);
-                        }
+                        await _s3Service.DeletePropertyPhotoAsync(photo.PhotoUrl);
                     }
                 }
             }

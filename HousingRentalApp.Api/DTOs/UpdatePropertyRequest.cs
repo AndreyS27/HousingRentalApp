@@ -17,7 +17,7 @@
         public bool? IsActive { get; set; }
         public List<int>? AmenityIds { get; set; }
         public List<DateOverrideDto>? DateOverrides { get; set; }
-        //public List<string>? PhotosToDelete { get; set; }
+        public List<string>? PhotosToDelete { get; set; }
         public List<int>? PhotosToDeleteIds { get; set; }
     }
 }

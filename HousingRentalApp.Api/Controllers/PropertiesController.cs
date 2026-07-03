@@ -4,10 +4,8 @@ using HousingRentalApp.Api.DTOs;
 using HousingRentalApp.Api.Models;
 using HousingRentalApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using System.Security.Claims;
 
 namespace HousingRentalApp.Api.Controllers
@@ -18,19 +16,19 @@ namespace HousingRentalApp.Api.Controllers
     {
         private readonly IPropertyService _propertyService;
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IPropertyViewRepository _propertyViewRepository;
+        private readonly IS3Service _s3Service;
 
         public PropertiesController(
-            IPropertyService propertyService, 
-            IWebHostEnvironment webHostEnvironment, 
+            IPropertyService propertyService,  
             ApplicationDbContext context,
-            IPropertyViewRepository propertyViewRepository)
+            IPropertyViewRepository propertyViewRepository,
+            IS3Service s3Service)
         {
             _propertyService = propertyService;
-            _webHostEnvironment = webHostEnvironment;
             _context = context;
             _propertyViewRepository = propertyViewRepository;
+            _s3Service = s3Service;
         }
 
         /// <summary>
@@ -113,27 +111,17 @@ namespace HousingRentalApp.Api.Controllers
                 var created = await _propertyService.CreatePropertyAsync(userId, request);
 
                 // сохранение фотографий
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
 
-                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var s3Service = HttpContext.RequestServices.GetRequiredService<IS3Service>();
 
                 for (int i = 0; i < photos.Count; i++)
                 {
-                    var photo = photos[i];
-                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await photo.CopyToAsync(stream);
-                    }
+                    var photoUrl = await s3Service.UploadPropertyPhotoAsync(photos[i]);
 
                     var propertyPhoto = new PropertyPhoto
                     {
                         PropertyId = created.PropertyId,
-                        PhotoUrl = $"{baseUrl}/uploads/properties/{fileName}",
+                        PhotoUrl = photoUrl,
                         IsMain = i == 0, // Первая фотография — главная
                     };
 
@@ -221,30 +209,19 @@ namespace HousingRentalApp.Api.Controllers
             if (photos.Count > remainingSlots)
                 return BadRequest(new { message = $"Можно добавить не более {remainingSlots} фотографий" });
 
-            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "properties");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
             var newPhotos = new List<PropertyPhoto>();
 
             for (int i = 0; i < photos.Count; i++)
             {
                 var photo = photos[i];
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await photo.CopyToAsync(stream);
-                }
+                var photoUrl = await _s3Service.UploadPropertyPhotoAsync(photo);
 
                 var isMain = currentPhotoCount == 0 && i == 0; // Если нет ни одной фотографии, первая становится главной
 
                 var propertyPhoto = new PropertyPhoto
                 {
                     PropertyId = id,
-                    PhotoUrl = $"{baseUrl}/uploads/properties/{fileName}",
+                    PhotoUrl = photoUrl,
                     IsMain = isMain,
                 };
 
