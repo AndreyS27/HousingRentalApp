@@ -144,6 +144,10 @@ export const CreatePropertyPage: React.FC = () => {
             newErrors.pricePerNight = 'Цена должна быть больше 0';
         }
 
+        if (!selectedPropertyTypeId) {
+            newErrors.propertyTypeId = 'Выберите тип объекта';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -363,8 +367,18 @@ export const CreatePropertyPage: React.FC = () => {
                             placeholder="Выберите тип"
                             data={propertyTypes.map(pt => ({ value: pt.propertyTypeId.toString(), label: pt.typeName }))}
                             value={selectedPropertyTypeId?.toString()}
-                            onChange={(value) => setSelectedPropertyTypeId(value ? parseInt(value) : null)}
+                            onChange={(value) => {
+                                setSelectedPropertyTypeId(value ? parseInt(value) : null);
+                                if (errors.propertyTypeId) {
+                                    setErrors((prev) => {
+                                        const newErrors = { ...prev };
+                                        delete newErrors.propertyTypeId;
+                                        return newErrors;
+                                    });
+                                }
+                            }}
                             required
+                            error={errors.propertyTypeId}
                         />
 
                         <Grid>
