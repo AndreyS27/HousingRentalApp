@@ -82,7 +82,7 @@ export const SearchPage: React.FC = () => {
         propertyTypeId: propertyTypeId || undefined,
         amenities: selectedAmenities.length > 0 ? selectedAmenities : undefined,
         page: page,
-        pageSize: 4,
+        pageSize: 6,
       };
 
       const response = await propertiesApi.search(params);
