@@ -23,7 +23,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const handleOpenInNewTab = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     // Строим URL с параметрами поиска
     const urlParams = new URLSearchParams();
     if (searchParams?.checkInDate) {
@@ -35,12 +35,15 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     if (searchParams?.guestCount) {
       urlParams.set('guests', searchParams.guestCount.toString());
     }
-    
+
     const queryString = urlParams.toString();
     const url = `${window.location.origin}/property/${property.propertyId}${queryString ? `?${queryString}` : ''}`;
-    
+
     window.open(url, '_blank');
   };
+
+  const hasReviews = property.averageRating !== 0 && property.averageRating !== undefined;
+  const ratingValue = hasReviews ? property.averageRating : 0;
 
   return (
     <Card
@@ -63,11 +66,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500} lineClamp={1}>{property.title}</Text>
-        {property.averageRating && (
-          <Badge color="pink">
-            ★ {property.averageRating.toFixed(1)}
-          </Badge>
-        )}
+        <Badge
+          color={hasReviews ? 'pink' : 'gray'}
+          variant={hasReviews ? 'filled' : 'light'}
+        >
+          ★ {ratingValue.toFixed(1)}
+        </Badge>
       </Group>
 
       <Group gap="xs" mb="sm">
@@ -81,8 +85,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           <Text size="sm">{property.guestsCount} гостей</Text>
         </Group>
         <Group gap="xs">
-          <IconBed size={16} />
           <Text size="sm">{property.bedroomsCount} спальни</Text>
+        </Group>
+        <Group gap="xs">
+          <IconBed size={16} />
+          <Text size="sm">{property.bedsCount} кроватей</Text>
         </Group>
       </Group>
 

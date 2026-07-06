@@ -380,7 +380,7 @@ namespace HousingRentalApp.Api.Services
 
             double? averageRating = property.Reviews != null && property.Reviews.Any()
                 ? property.Reviews.Average(r => r.Rating)
-                : null;
+                : 0;
 
             return new PropertySummaryResponse
             {
@@ -392,6 +392,7 @@ namespace HousingRentalApp.Api.Services
                 AverageRating = averageRating,
                 GuestsCount = property.GuestsCount,
                 BedroomsCount = property.BedroomsCount,
+                BedsCount = property.BedsCount,
                 Latitude = property.Latitude,
                 Longitude = property.Longitude,
                 IsActive = property.IsActive,
