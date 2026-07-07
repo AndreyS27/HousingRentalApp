@@ -189,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({ withSearch = false, children }) 
             реальных сделок.
           </Text>
           <Text>
-            Целью развития приложения является отработка автором навыков fullstack разработки с использованием C#, ASP.NET Core, TypeScript, React, Mantine и др.
+            Целью дальнейшего развития приложения является отработка автором навыков fullstack разработки с использованием C#, ASP.NET Core, TypeScript, React, Mantine и др.
           </Text>
         </Stack>
       </Modal>

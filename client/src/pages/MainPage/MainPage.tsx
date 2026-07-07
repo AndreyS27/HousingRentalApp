@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -8,6 +8,8 @@ import {
   Stack,
   Title,
   Box,
+  Modal,
+  Text,
 } from '@mantine/core';
 import { IconSearch, IconCalendar, IconUsers } from '@tabler/icons-react';
 import { DatePickerInput, DatesRangeValue } from '@mantine/dates';
@@ -22,6 +24,15 @@ export const MainPage: React.FC = () => {
   const [city, setCity] = useState('');
   const [dateRange, setDateRange] = useState<DatesRangeValue>([null, null]);
   const [guestsCount, setGuestsCount] = useState<number | null>(null);
+  const [disclaimerOpened, setDisclaimerOpened] = useState(false);
+
+  useEffect(() => {
+    const hasSeenDisclaimer = localStorage.getItem('hasSeenDisclaimer');
+    if (!hasSeenDisclaimer) {
+      setDisclaimerOpened(true);
+      localStorage.setItem('hasSeenDisclaimer', 'true');
+    }
+  }, []);
 
   const handleSearch = () => {
     if (!city.trim()) return;
@@ -90,6 +101,35 @@ export const MainPage: React.FC = () => {
           </Stack>
         </Paper>
       </Container>
+
+      {/* Модальное окно-дисклеймер */}
+      <Modal
+        opened={disclaimerOpened}
+        onClose={() => setDisclaimerOpened(false)}
+        title="О проекте"
+        centered
+        size="lg"
+        zIndex={1000}
+      >
+        <Stack gap="md">
+          <Text>
+            Данное веб-приложение создано в рамках выполнения дипломной работы
+            по теме «Разработка веб-приложения для аренды жилья».
+          </Text>
+          <Text>
+            Проект является учебно-демонстрационным и <strong>не предназначен
+              для осуществления реальных сделок</strong> между арендодателями и арендаторами.
+            Все объявления об аренде, а также данные о пользователях, объектах
+            недвижимости и отзывах являются <strong>вымышленными</strong>. Любые совпадения
+            с реальными людьми, организациями, адресами или событиями случайны.
+          </Text>
+          <Text>
+            Приложение не преследует коммерческих целей и не несёт ответственности
+            за какие-либо последствия, связанные с его использованием для заключения
+            реальных сделок.
+          </Text>
+        </Stack>
+      </Modal>
     </Box>
   );
 };
