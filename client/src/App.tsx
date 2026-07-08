@@ -11,6 +11,7 @@ import { EditPropertyPage } from './pages/EditPropertyPage/EditPropertyPage';
 import { BookingPage } from './pages/BookingPage/BookingPage';
 import { BookingSuccessPage } from './pages/BookingSuccessPage/BookingSuccessPage';
 import { Footer } from './components/Layout/Footer/Footer';
+import { ContactsPage } from './pages/ContactPage/ContactPage';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/edit-property/:id" element={<EditPropertyPage />} />
           <Route path="/booking" element={<BookingPage />} />
           <Route path="/booking-success" element={<BookingSuccessPage />} />
+          <Route path="/contacts" element={<ContactsPage />} />
         </Routes>
       </div>
       <Footer />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container, Group, Text, Divider, Stack } from '@mantine/core';
+import { Link } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
   return (
@@ -13,7 +14,14 @@ export const Footer: React.FC = () => {
             <Text size="sm" c="dimmed" style={{ cursor: 'default' }}>
               Политика конфиденциальности
             </Text>
-            <Text size="sm" c="dimmed" style={{ cursor: 'default' }}>
+            <Text 
+              size="sm" 
+              c="dimmed" 
+              style={{ cursor: 'pointer', textDecoration: 'none' }}
+              component={Link}
+              to="/contacts"
+              _hover={{ textDecoraction: 'underline' }}
+            >
               Контакты
             </Text>
           </Group>
