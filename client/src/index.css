@@ -17,3 +17,16 @@ html, body, #root {
   margin: 0;
   padding: 0;
 }
+
+/* Стили для индикаторов карусели */
+.mantine-Carousel-indicator {
+  width: 8px;
+  height: 8px;
+  transition: width 250ms ease;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.mantine-Carousel-indicator[data-active] {
+  width: 24px;
+  background-color: #339af0 !important;
+}

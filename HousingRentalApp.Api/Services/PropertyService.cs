@@ -378,6 +378,12 @@ namespace HousingRentalApp.Api.Services
                 ?? property.PropertyPhotos?.FirstOrDefault()?.PhotoUrl
                 ?? string.Empty;
 
+            var photos = property.PropertyPhotos?
+                .OrderBy(p => p.IsMain ? 0 : 1)
+                .ThenBy(p => p.PhotoId)
+                .Select(p => p.PhotoUrl)
+                .ToList() ?? new List<string>();
+
             double? averageRating = property.Reviews != null && property.Reviews.Any()
                 ? property.Reviews.Average(r => r.Rating)
                 : 0;
@@ -388,6 +394,7 @@ namespace HousingRentalApp.Api.Services
                 Title = property.Title,
                 City = property.City,
                 MainPhotoUrl = mainPhoto,
+                Photos = photos,
                 PricePerNight = property.PricePerNight,
                 AverageRating = averageRating,
                 GuestsCount = property.GuestsCount,

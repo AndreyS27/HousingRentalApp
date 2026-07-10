@@ -22,6 +22,7 @@ export interface PropertySummary {
   city: string;
   address: string;
   mainPhotoUrl: string;
+  photos: string[];
   pricePerNight: number;
   averageRating: number | null;
   guestsCount: number;

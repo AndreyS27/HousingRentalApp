@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Image, Text, Badge, Group } from '@mantine/core';
-import { IconBed, IconUsers, IconMapPin } from '@tabler/icons-react';
+import { Carousel } from '@mantine/carousel';
+import { IconBed, IconUsers, IconMapPin, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { PropertySummary } from '../../types';
 
 interface PropertyCardProps {
@@ -24,7 +25,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleOpenInNewTab = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    // Строим URL с параметрами поиска
     const urlParams = new URLSearchParams();
     if (searchParams?.checkInDate) {
       urlParams.set('checkIn', searchParams.checkInDate);
@@ -45,6 +45,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const hasReviews = property.averageRating !== 0 && property.averageRating !== undefined;
   const ratingValue = hasReviews ? property.averageRating : 0;
 
+  const photos = property.photos && property.photos.length > 0
+    ? property.photos
+    : ['https://placehold.co/400x300?text=No+Image'];
+
+  const handleCarouselClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <Card
       shadow="sm"
@@ -52,16 +60,50 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       radius="md"
       withBorder
       onClick={handleOpenInNewTab}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={() => {
+        onMouseEnter();
+      }}
+      onMouseLeave={() => {
+        onMouseLeave();
+      }}
       style={{ cursor: 'pointer' }}
     >
       <Card.Section>
-        <Image
-          src={property.mainPhotoUrl || 'https://placehold.co/400x300?text=No+Image'}
-          height={200}
-          alt={property.title}
-        />
+        <div onClick={handleCarouselClick} style={{ position: 'relative' }}>
+          <Carousel
+            height={200}
+            loop
+            withIndicators={photos.length > 1}
+            withControls={photos.length > 1}
+            styles={{
+              root: { borderRadius: '4px 4px 0 0' },
+              indicator: { backgroundColor: '#fff', opacity: 0.7 },
+              control: {
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                color: '#fff',
+                width: 30,
+                height: 30,
+                borderRadius: '50%',
+                border: 'none',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                transition: 'background-color 0.2s ease',
+              },
+            }}
+            nextControlIcon={<IconChevronRight size={24} />}
+            previousControlIcon={<IconChevronLeft size={24} />}
+          >
+            {photos.map((photoUrl, index) => (
+              <Carousel.Slide key={index}>
+                <Image
+                  src={photoUrl}
+                  height={200}
+                  fit="cover"
+                  alt={`${property.title} - фото ${index + 1}`}
+                />
+              </Carousel.Slide>
+            ))}
+          </Carousel>
+        </div>
       </Card.Section>
 
       <Group justify="space-between" mt="md" mb="xs">
