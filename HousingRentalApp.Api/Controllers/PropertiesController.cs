@@ -90,7 +90,6 @@ namespace HousingRentalApp.Api.Controllers
         {
             var userId = GetCurrentUserId();
 
-            // Базовая валидация
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

@@ -15,7 +15,6 @@ namespace HousingRentalApp.Api.Controllers
 
             using var client = new HttpClient();
 
-            // Добавляем User-Agent (требование Nominatim)
             client.DefaultRequestHeaders.Add("User-Agent", "HousingRentalApp/1.0 (sampandrey@yandex.ru)");
 
             var url = $"https://nominatim.openstreetmap.org/search?q={Uri.EscapeDataString(city)}&format=json&limit=1";
