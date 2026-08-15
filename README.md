@@ -88,3 +88,26 @@ HTTP-клиент |	Axios
 
 ---
 ## 📸 Скриншоты приложения
+### 1. Главная страница
+<img width="1628" height="1029" alt="image" src="https://github.com/user-attachments/assets/f3cce10a-ee53-4c5d-9ac1-0f80011ab5c0" />
+
+### 2. Страница поиска
+<img width="2536" height="1209" alt="image" src="https://github.com/user-attachments/assets/2c4efa27-6d9d-4861-8241-2c546949873a" />
+
+### 3. Модальное окно фильтров
+<img width="1778" height="1265" alt="image" src="https://github.com/user-attachments/assets/f4731a39-c076-423c-b64d-3a0fcccca059" />
+
+### 4. Страница с подробной информацией об объекте
+<img width="1309" height="1268" alt="image" src="https://github.com/user-attachments/assets/c08e5da9-1601-437e-a05f-0ef602073a2c" />
+
+### 5. Страница создания бронирования
+<img width="1634" height="1250" alt="image" src="https://github.com/user-attachments/assets/e87c418c-02e3-4f43-b8a1-487b011c9d7a" />
+
+### 6. Личный кабинет (1/2)
+<img width="1627" height="1257" alt="image" src="https://github.com/user-attachments/assets/4c67f980-ec89-4220-8a9b-ca98411e34b7" />
+
+### 7. Личный кабинет (2/2)
+<img width="1461" height="1244" alt="image" src="https://github.com/user-attachments/assets/537dee51-bccb-4201-b3a8-9c0d9441f69a" />
+
+
+
