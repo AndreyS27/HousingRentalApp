@@ -10,9 +10,9 @@
 ![](https://img.shields.io/badge/Mantine-7.x-339AF0?logo=mantine)
 
 ## Демо
-Приложение доступно по адресу: https://andreys27-housingrentalapp-aaeb.twc1.net/
-
-Тестовые данные:  
+Приложение доступно по ссылке:
+<a href="https://andreys27-housingrentalapp-aaeb.twc1.net/" target="_blank">ссылка</a>  
+Тестовые данные для авторизации:  
 Email: owner1@example.com  
 Пароль: qwerty
 
