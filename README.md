@@ -9,6 +9,15 @@
 ![](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)
 ![](https://img.shields.io/badge/Mantine-7.x-339AF0?logo=mantine)
 
+## Демо
+Приложение доступно по адресу: https://andreys27-housingrentalapp-aaeb.twc1.net/
+
+Тестовые данные:  
+Email: owner1@example.com  
+Пароль: qwerty
+
+⚠️ Внимание: Демо-версия предназначена только для ознакомления. Не используйте реальные данные.
+
 ### Используемые технологии (Backend)
 
 | <!-- --> | <!-- --> |
